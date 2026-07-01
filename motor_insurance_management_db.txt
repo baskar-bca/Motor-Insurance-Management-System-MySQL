@@ -1,0 +1,3689 @@
+CREATE DATABASE motor_insurance_management_db;
+USE motor_insurance_management_db;
+
+CREATE TABLE mi_regions (
+    region_id INT AUTO_INCREMENT,
+    region_name VARCHAR(50) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_regions PRIMARY KEY (region_id),
+    CONSTRAINT uk_mi_regions_name UNIQUE (region_name)
+);
+CREATE TABLE mi_states (
+    state_id INT AUTO_INCREMENT,
+    region_id INT NOT NULL,
+    state_name VARCHAR(100) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_states PRIMARY KEY (state_id),
+    CONSTRAINT fk_mi_states_regions FOREIGN KEY (region_id)
+        REFERENCES mi_regions (region_id),
+    CONSTRAINT uk_mi_states_name UNIQUE (state_name)
+);
+CREATE TABLE mi_cities (
+    city_id INT AUTO_INCREMENT,
+    state_id INT NOT NULL,
+    city_name VARCHAR(100) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_cities PRIMARY KEY (city_id),
+    CONSTRAINT fk_mi_cities_states FOREIGN KEY (state_id)
+        REFERENCES mi_states (state_id),
+    CONSTRAINT uk_mi_cities_name UNIQUE (city_name)
+);
+CREATE TABLE mi_vehicle_make (
+    make_id INT AUTO_INCREMENT,
+    make_name VARCHAR(100) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_vehicle_make PRIMARY KEY (make_id),
+    CONSTRAINT uk_mi_vehicle_make_name UNIQUE (make_name)
+);
+CREATE TABLE mi_vehicle_model (
+    model_id INT AUTO_INCREMENT,
+    make_id INT NOT NULL,
+    model_name VARCHAR(100) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_vehicle_model PRIMARY KEY (model_id),
+    CONSTRAINT fk_mi_vehicle_model_make FOREIGN KEY (make_id)
+        REFERENCES mi_vehicle_make (make_id),
+    CONSTRAINT uk_mi_vehicle_model_name UNIQUE (model_name)
+);
+CREATE TABLE mi_vehicle_body (
+    body_id INT AUTO_INCREMENT,
+    body_name VARCHAR(100) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_vehicle_body PRIMARY KEY (body_id),
+    CONSTRAINT uk_mi_vehicle_body_name UNIQUE (body_name)
+);
+CREATE TABLE mi_vehicle_color (
+    color_id INT AUTO_INCREMENT,
+    color_name VARCHAR(50) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_vehicle_color PRIMARY KEY (color_id),
+    CONSTRAINT uk_mi_vehicle_color_name UNIQUE (color_name)
+);
+CREATE TABLE mi_vehicle_category (
+    category_id INT AUTO_INCREMENT,
+    category_name VARCHAR(100) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_vehicle_category PRIMARY KEY (category_id),
+    CONSTRAINT uk_mi_vehicle_category_name UNIQUE (category_name)
+);
+CREATE TABLE mi_lov_master (
+    lov_id INT AUTO_INCREMENT,
+    lov_type VARCHAR(100) NOT NULL,
+    lov_value VARCHAR(100) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_lov_master PRIMARY KEY (lov_id)
+);
+CREATE TABLE mi_coverages (
+    coverage_id INT AUTO_INCREMENT,
+    coverage_name VARCHAR(100) NOT NULL,
+    coverage_description VARCHAR(255),
+    coverage_type VARCHAR(50),
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_coverages PRIMARY KEY (coverage_id),
+    CONSTRAINT uk_mi_coverages_name UNIQUE (coverage_name)
+);
+CREATE TABLE mi_user_roles (
+    role_id INT,
+    role_name VARCHAR(50) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_user_roles PRIMARY KEY (role_id),
+    CONSTRAINT uk_mi_user_roles_name UNIQUE (role_name)
+);
+CREATE TABLE mi_users (
+    user_id INT,
+    role_id INT NOT NULL,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50),
+    gender VARCHAR(20),
+    dob DATE,
+    email VARCHAR(100) NOT NULL,
+    mobile VARCHAR(20),
+    city_id INT,
+    national_id VARCHAR(30),
+    status VARCHAR(20) NOT NULL,
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_users PRIMARY KEY (user_id),
+    CONSTRAINT fk_mi_users_roles FOREIGN KEY (role_id)
+        REFERENCES mi_user_roles (role_id),
+    CONSTRAINT fk_mi_users_city FOREIGN KEY (city_id)
+        REFERENCES mi_cities (city_id)
+);
+CREATE TABLE mi_login_users (
+    login_id INT,
+    user_id INT NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    last_login DATETIME,
+    status VARCHAR(20) NOT NULL,
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_login_users PRIMARY KEY (login_id),
+    CONSTRAINT fk_mi_login_users_user FOREIGN KEY (user_id)
+        REFERENCES mi_users (user_id),
+    CONSTRAINT uk_mi_login_users_username UNIQUE (username)
+);
+CREATE TABLE mi_brokers (
+    broker_id INT,
+    user_id INT NOT NULL,
+    organization_name VARCHAR(100),
+    credit_balance DECIMAL(15 , 2 ),
+    mobile VARCHAR(20),
+    city_id INT,
+    status VARCHAR(20) NOT NULL,
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_brokers PRIMARY KEY (broker_id),
+    CONSTRAINT fk_mi_brokers_user FOREIGN KEY (user_id)
+        REFERENCES mi_users (user_id),
+    CONSTRAINT fk_mi_brokers_city FOREIGN KEY (city_id)
+        REFERENCES mi_cities (city_id)
+);
+CREATE TABLE mi_sales_agents (
+    agent_id INT,
+    broker_id INT NOT NULL,
+    user_id INT NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_sales_agents PRIMARY KEY (agent_id),
+    CONSTRAINT fk_mi_sales_agents_broker FOREIGN KEY (broker_id)
+        REFERENCES mi_brokers (broker_id),
+    CONSTRAINT fk_mi_sales_agents_user FOREIGN KEY (user_id)
+        REFERENCES mi_users (user_id)
+);
+CREATE TABLE mi_customers (
+    customer_id INT,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50),
+    gender VARCHAR(20),
+    dob DATE,
+    email VARCHAR(100),
+    mobile VARCHAR(20),
+    address1 VARCHAR(100),
+    address2 VARCHAR(100),
+    city_id INT,
+    national_id VARCHAR(30),
+    status VARCHAR(20) NOT NULL,
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_customers PRIMARY KEY (customer_id),
+    CONSTRAINT fk_mi_customers_city FOREIGN KEY (city_id)
+        REFERENCES mi_cities (city_id)
+);
+CREATE TABLE mi_vehicles (
+    vehicle_id INT,
+    customer_id INT NOT NULL,
+    make_id INT NOT NULL,
+    model_id INT NOT NULL,
+    body_id INT NOT NULL,
+    color_id INT NOT NULL,
+    category_id INT NOT NULL,
+    registration_no VARCHAR(50) NOT NULL,
+    chassis_no VARCHAR(50),
+    engine_no VARCHAR(50),
+    manufacture_year INT,
+    status VARCHAR(20) NOT NULL,
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_vehicles PRIMARY KEY (vehicle_id),
+    CONSTRAINT fk_mi_vehicles_customer FOREIGN KEY (customer_id)
+        REFERENCES mi_customers (customer_id),
+    CONSTRAINT fk_mi_vehicles_make FOREIGN KEY (make_id)
+        REFERENCES mi_vehicle_make (make_id),
+    CONSTRAINT fk_mi_vehicles_model FOREIGN KEY (model_id)
+        REFERENCES mi_vehicle_model (model_id),
+    CONSTRAINT fk_mi_vehicles_body FOREIGN KEY (body_id)
+        REFERENCES mi_vehicle_body (body_id),
+    CONSTRAINT fk_mi_vehicles_color FOREIGN KEY (color_id)
+        REFERENCES mi_vehicle_color (color_id),
+    CONSTRAINT fk_mi_vehicles_category FOREIGN KEY (category_id)
+        REFERENCES mi_vehicle_category (category_id)
+);
+CREATE TABLE mi_quotes (
+    quote_id INT,
+    customer_id INT NOT NULL,
+    vehicle_id INT NOT NULL,
+    broker_id INT,
+    agent_id INT,
+    quote_date DATE,
+    base_premium DECIMAL(12 , 2 ),
+    tax_amount DECIMAL(12 , 2 ),
+    final_premium DECIMAL(12 , 2 ),
+    quote_status VARCHAR(30),
+    status VARCHAR(20) NOT NULL,
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_quotes PRIMARY KEY (quote_id),
+    CONSTRAINT fk_mi_quotes_customer FOREIGN KEY (customer_id)
+        REFERENCES mi_customers (customer_id),
+    CONSTRAINT fk_mi_quotes_vehicle FOREIGN KEY (vehicle_id)
+        REFERENCES mi_vehicles (vehicle_id),
+    CONSTRAINT fk_mi_quotes_broker FOREIGN KEY (broker_id)
+        REFERENCES mi_brokers (broker_id),
+    CONSTRAINT fk_mi_quotes_agent FOREIGN KEY (agent_id)
+        REFERENCES mi_sales_agents (agent_id)
+);
+CREATE TABLE mi_quote_coverages (
+    qc_id INT,
+    quote_id INT NOT NULL,
+    coverage_id INT NOT NULL,
+    sum_insured DECIMAL(15 , 2 ),
+    premium_amount DECIMAL(12 , 2 ),
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_quote_coverages PRIMARY KEY (qc_id),
+    CONSTRAINT fk_mi_quote_coverages_quote FOREIGN KEY (quote_id)
+        REFERENCES mi_quotes (quote_id),
+    CONSTRAINT fk_mi_quote_coverages_coverage FOREIGN KEY (coverage_id)
+        REFERENCES mi_coverages (coverage_id)
+);
+CREATE TABLE mi_premium_rates (
+    rate_id INT,
+    category_id INT NOT NULL,
+    coverage_id INT NOT NULL,
+    vehicle_age_from INT,
+    vehicle_age_to INT,
+    rate_percent DECIMAL(8 , 2 ),
+    status VARCHAR(20) NOT NULL,
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_premium_rates PRIMARY KEY (rate_id),
+    CONSTRAINT fk_mi_premium_rates_category FOREIGN KEY (category_id)
+        REFERENCES mi_vehicle_category (category_id),
+    CONSTRAINT fk_mi_premium_rates_coverage FOREIGN KEY (coverage_id)
+        REFERENCES mi_coverages (coverage_id)
+);
+CREATE TABLE mi_payments (
+    payment_id INT,
+    quote_id INT NOT NULL,
+    payment_date DATE,
+    amount DECIMAL(15 , 2 ),
+    currency VARCHAR(20),
+    payment_mode VARCHAR(50),
+    transaction_no VARCHAR(100),
+    payment_status VARCHAR(30),
+    status VARCHAR(20) NOT NULL,
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_payments PRIMARY KEY (payment_id),
+    CONSTRAINT fk_mi_payments_quote FOREIGN KEY (quote_id)
+        REFERENCES mi_quotes (quote_id)
+);
+CREATE TABLE mi_policies (
+    policy_id INT,
+    quote_id INT NOT NULL,
+    policy_number VARCHAR(100) NOT NULL,
+    policy_start_date DATE,
+    policy_end_date DATE,
+    premium_amount DECIMAL(15 , 2 ),
+    policy_status VARCHAR(30),
+    status VARCHAR(20) NOT NULL,
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_policies PRIMARY KEY (policy_id),
+    CONSTRAINT fk_mi_policies_quote FOREIGN KEY (quote_id)
+        REFERENCES mi_quotes (quote_id),
+    CONSTRAINT uk_mi_policies_number UNIQUE (policy_number)
+);
+CREATE TABLE mi_claims (
+    claim_id INT,
+    policy_id INT NOT NULL,
+    claim_date DATE,
+    claim_amount DECIMAL(15 , 2 ),
+    claim_status VARCHAR(30),
+    remarks VARCHAR(255),
+    status VARCHAR(20) NOT NULL,
+    created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_mi_claims PRIMARY KEY (claim_id),
+    CONSTRAINT fk_mi_claims_policy FOREIGN KEY (policy_id)
+        REFERENCES mi_policies (policy_id)
+);
+CREATE TABLE mi_audit_log (
+    audit_id INT,
+    table_name VARCHAR(100),
+    record_id INT,
+    action_type VARCHAR(30),
+    old_value VARCHAR(500),
+    new_value VARCHAR(500),
+    action_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    action_by VARCHAR(50),
+    CONSTRAINT pk_mi_audit_log PRIMARY KEY (audit_id)
+);
+
+show tables;
+INSERT INTO mi_regions
+VALUES
+(1,'SOUTH','ACTIVE',NOW(),'ADMIN'),
+(2,'NORTH','ACTIVE',NOW(),'ADMIN'),
+(3,'EAST','ACTIVE',NOW(),'ADMIN'),
+(4,'WEST','ACTIVE',NOW(),'ADMIN'),
+(5,'CENTRAL','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_states
+VALUES
+(1,1,'Tamil Nadu','ACTIVE',NOW(),'ADMIN'),
+(2,1,'Karnataka','ACTIVE',NOW(),'ADMIN'),
+(3,1,'Kerala','ACTIVE',NOW(),'ADMIN'),
+(4,1,'Andhra Pradesh','ACTIVE',NOW(),'ADMIN'),
+(5,1,'Telangana','ACTIVE',NOW(),'ADMIN'),
+
+(6,2,'Delhi','ACTIVE',NOW(),'ADMIN'),
+(7,2,'Punjab','ACTIVE',NOW(),'ADMIN'),
+(8,2,'Haryana','ACTIVE',NOW(),'ADMIN'),
+(9,2,'Uttar Pradesh','ACTIVE',NOW(),'ADMIN'),
+(10,3,'West Bengal','ACTIVE',NOW(),'ADMIN'),
+
+(11,3,'Odisha','ACTIVE',NOW(),'ADMIN'),
+(12,3,'Assam','ACTIVE',NOW(),'ADMIN'),
+(13,4,'Maharashtra','ACTIVE',NOW(),'ADMIN'),
+(14,4,'Gujarat','ACTIVE',NOW(),'ADMIN'),
+(15,4,'Rajasthan','ACTIVE',NOW(),'ADMIN'),
+
+(16,5,'Madhya Pradesh','ACTIVE',NOW(),'ADMIN'),
+(17,5,'Chhattisgarh','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_cities
+VALUES
+(1,1,'Chennai','ACTIVE',NOW(),'ADMIN'),
+(2,1,'Coimbatore','ACTIVE',NOW(),'ADMIN'),
+(3,1,'Madurai','ACTIVE',NOW(),'ADMIN'),
+(4,1,'Salem','ACTIVE',NOW(),'ADMIN'),
+(5,1,'Trichy','ACTIVE',NOW(),'ADMIN'),
+
+(6,2,'Bengaluru','ACTIVE',NOW(),'ADMIN'),
+(7,2,'Mysuru','ACTIVE',NOW(),'ADMIN'),
+(8,2,'Mangalore','ACTIVE',NOW(),'ADMIN'),
+(9,2,'Hubli','ACTIVE',NOW(),'ADMIN'),
+(10,2,'Belgaum','ACTIVE',NOW(),'ADMIN'),
+
+(11,3,'Kochi','ACTIVE',NOW(),'ADMIN'),
+(12,3,'Thiruvananthapuram','ACTIVE',NOW(),'ADMIN'),
+(13,3,'Kozhikode','ACTIVE',NOW(),'ADMIN'),
+(14,4,'Visakhapatnam','ACTIVE',NOW(),'ADMIN'),
+(15,4,'Vijayawada','ACTIVE',NOW(),'ADMIN'),
+
+(16,4,'Guntur','ACTIVE',NOW(),'ADMIN'),
+(17,5,'Hyderabad','ACTIVE',NOW(),'ADMIN'),
+(18,5,'Warangal','ACTIVE',NOW(),'ADMIN'),
+(19,5,'Karimnagar','ACTIVE',NOW(),'ADMIN'),
+(20,6,'New Delhi','ACTIVE',NOW(),'ADMIN'),
+
+(21,7,'Amritsar','ACTIVE',NOW(),'ADMIN'),
+(22,7,'Ludhiana','ACTIVE',NOW(),'ADMIN'),
+(23,8,'Gurugram','ACTIVE',NOW(),'ADMIN'),
+(24,8,'Faridabad','ACTIVE',NOW(),'ADMIN'),
+(25,9,'Lucknow','ACTIVE',NOW(),'ADMIN'),
+
+(26,9,'Kanpur','ACTIVE',NOW(),'ADMIN'),
+(27,9,'Noida','ACTIVE',NOW(),'ADMIN'),
+(28,9,'Agra','ACTIVE',NOW(),'ADMIN'),
+(29,10,'Kolkata','ACTIVE',NOW(),'ADMIN'),
+(30,10,'Howrah','ACTIVE',NOW(),'ADMIN'),
+
+(31,11,'Bhubaneswar','ACTIVE',NOW(),'ADMIN'),
+(32,11,'Cuttack','ACTIVE',NOW(),'ADMIN'),
+(33,12,'Guwahati','ACTIVE',NOW(),'ADMIN'),
+(34,12,'Silchar','ACTIVE',NOW(),'ADMIN'),
+(35,13,'Mumbai','ACTIVE',NOW(),'ADMIN'),
+
+(36,13,'Pune','ACTIVE',NOW(),'ADMIN'),
+(37,13,'Nagpur','ACTIVE',NOW(),'ADMIN'),
+(38,13,'Nashik','ACTIVE',NOW(),'ADMIN'),
+(39,14,'Ahmedabad','ACTIVE',NOW(),'ADMIN'),
+(40,14,'Surat','ACTIVE',NOW(),'ADMIN'),
+
+(41,14,'Vadodara','ACTIVE',NOW(),'ADMIN'),
+(42,15,'Jaipur','ACTIVE',NOW(),'ADMIN'),
+(43,15,'Jodhpur','ACTIVE',NOW(),'ADMIN'),
+(44,15,'Udaipur','ACTIVE',NOW(),'ADMIN'),
+(45,16,'Bhopal','ACTIVE',NOW(),'ADMIN'),
+
+(46,16,'Indore','ACTIVE',NOW(),'ADMIN'),
+(47,16,'Gwalior','ACTIVE',NOW(),'ADMIN'),
+(48,17,'Raipur','ACTIVE',NOW(),'ADMIN'),
+(49,17,'Bilaspur','ACTIVE',NOW(),'ADMIN'),
+(50,17,'Durg','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_vehicle_make
+VALUES
+(1,'Maruti Suzuki','ACTIVE',NOW(),'ADMIN'),
+(2,'Hyundai','ACTIVE',NOW(),'ADMIN'),
+(3,'Tata','ACTIVE',NOW(),'ADMIN'),
+(4,'Mahindra','ACTIVE',NOW(),'ADMIN'),
+(5,'Honda','ACTIVE',NOW(),'ADMIN'),
+
+(6,'Toyota','ACTIVE',NOW(),'ADMIN'),
+(7,'Kia','ACTIVE',NOW(),'ADMIN'),
+(8,'Renault','ACTIVE',NOW(),'ADMIN'),
+(9,'Nissan','ACTIVE',NOW(),'ADMIN'),
+(10,'Volkswagen','ACTIVE',NOW(),'ADMIN'),
+
+(11,'Skoda','ACTIVE',NOW(),'ADMIN'),
+(12,'MG','ACTIVE',NOW(),'ADMIN'),
+(13,'Jeep','ACTIVE',NOW(),'ADMIN'),
+(14,'BMW','ACTIVE',NOW(),'ADMIN'),
+(15,'Mercedes-Benz','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_vehicle_model
+VALUES
+(1,1,'Swift','ACTIVE',NOW(),'ADMIN'),
+(2,1,'Baleno','ACTIVE',NOW(),'ADMIN'),
+(3,1,'Brezza','ACTIVE',NOW(),'ADMIN'),
+(4,1,'Dzire','ACTIVE',NOW(),'ADMIN'),
+(5,2,'i20','ACTIVE',NOW(),'ADMIN'),
+
+
+(6,2,'Creta','ACTIVE',NOW(),'ADMIN'),
+(7,2,'Verna','ACTIVE',NOW(),'ADMIN'),
+(8,2,'Venue','ACTIVE',NOW(),'ADMIN'),
+(9,3,'Nexon','ACTIVE',NOW(),'ADMIN'),
+(10,3,'Punch','ACTIVE',NOW(),'ADMIN'),
+
+(11,3,'Harrier','ACTIVE',NOW(),'ADMIN'),
+(12,3,'Safari','ACTIVE',NOW(),'ADMIN'),
+(13,4,'Scorpio','ACTIVE',NOW(),'ADMIN'),
+(14,4,'XUV700','ACTIVE',NOW(),'ADMIN'),
+(15,4,'Bolero','ACTIVE',NOW(),'ADMIN'),
+
+(16,5,'City','ACTIVE',NOW(),'ADMIN'),
+(17,5,'Amaze','ACTIVE',NOW(),'ADMIN'),
+(18,5,'Elevate','ACTIVE',NOW(),'ADMIN'),
+(19,6,'Innova Crysta','ACTIVE',NOW(),'ADMIN'),
+(20,6,'Fortuner','ACTIVE',NOW(),'ADMIN'),
+
+(21,6,'Glanza','ACTIVE',NOW(),'ADMIN'),
+(22,7,'Seltos','ACTIVE',NOW(),'ADMIN'),
+(23,7,'Sonet','ACTIVE',NOW(),'ADMIN'),
+(24,7,'Carens','ACTIVE',NOW(),'ADMIN'),
+(25,8,'Kwid','ACTIVE',NOW(),'ADMIN'),
+
+(26,8,'Kiger','ACTIVE',NOW(),'ADMIN'),
+(27,8,'Triber','ACTIVE',NOW(),'ADMIN'),
+(28,9,'Magnite','ACTIVE',NOW(),'ADMIN'),
+(29,10,'Virtus','ACTIVE',NOW(),'ADMIN'),
+(30,10,'Taigun','ACTIVE',NOW(),'ADMIN'),
+
+(31,11,'Slavia','ACTIVE',NOW(),'ADMIN'),
+(32,11,'Kushaq','ACTIVE',NOW(),'ADMIN'),
+(33,12,'Astor','ACTIVE',NOW(),'ADMIN'),
+(34,12,'Hector','ACTIVE',NOW(),'ADMIN'),
+(35,13,'Compass','ACTIVE',NOW(),'ADMIN'),
+
+(36,14,'X1','ACTIVE',NOW(),'ADMIN'),
+(37,14,'X3','ACTIVE',NOW(),'ADMIN'),
+(38,14,'5 Series','ACTIVE',NOW(),'ADMIN'),
+(39,15,'C-Class','ACTIVE',NOW(),'ADMIN'),
+(40,15,'E-Class','ACTIVE',NOW(),'ADMIN'),
+
+(41,15,'GLA','ACTIVE',NOW(),'ADMIN'),
+(42,1,'Ertiga','ACTIVE',NOW(),'ADMIN'),
+(43,2,'Alcazar','ACTIVE',NOW(),'ADMIN'),
+(44,3,'Tiago','ACTIVE',NOW(),'ADMIN'),
+(45,4,'Thar','ACTIVE',NOW(),'ADMIN'),
+
+(46,5,'WR-V','ACTIVE',NOW(),'ADMIN'),
+(47,6,'Urban Cruiser','ACTIVE',NOW(),'ADMIN'),
+(48,7,'EV6','ACTIVE',NOW(),'ADMIN'),
+(49,8,'Duster','ACTIVE',NOW(),'ADMIN'),
+(50,9,'Sunny','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_vehicle_body
+VALUES
+(1,'Hatchback','ACTIVE',NOW(),'ADMIN'),
+(2,'Sedan','ACTIVE',NOW(),'ADMIN'),
+(3,'SUV','ACTIVE',NOW(),'ADMIN'),
+(4,'MUV','ACTIVE',NOW(),'ADMIN'),
+(5,'Coupe','ACTIVE',NOW(),'ADMIN'),
+(6,'Convertible','ACTIVE',NOW(),'ADMIN'),
+(7,'Pickup','ACTIVE',NOW(),'ADMIN'),
+(8,'Van','ACTIVE',NOW(),'ADMIN'),
+(9,'Luxury Sedan','ACTIVE',NOW(),'ADMIN'),
+(10,'Luxury SUV','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_vehicle_color
+VALUES
+(1,'White','ACTIVE',NOW(),'ADMIN'),
+(2,'Black','ACTIVE',NOW(),'ADMIN'),
+(3,'Silver','ACTIVE',NOW(),'ADMIN'),
+(4,'Grey','ACTIVE',NOW(),'ADMIN'),
+(5,'Red','ACTIVE',NOW(),'ADMIN'),
+
+(6,'Blue','ACTIVE',NOW(),'ADMIN'),
+(7,'Green','ACTIVE',NOW(),'ADMIN'),
+(8,'Brown','ACTIVE',NOW(),'ADMIN'),
+(9,'Yellow','ACTIVE',NOW(),'ADMIN'),
+(10,'Orange','ACTIVE',NOW(),'ADMIN'),
+
+(11,'Purple','ACTIVE',NOW(),'ADMIN'),
+(12,'Gold','ACTIVE',NOW(),'ADMIN'),
+(13,'Beige','ACTIVE',NOW(),'ADMIN'),
+(14,'Maroon','ACTIVE',NOW(),'ADMIN'),
+(15,'Pearl White','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_vehicle_category
+VALUES
+(1,'Private Car','ACTIVE',NOW(),'ADMIN'),
+(2,'Commercial Car','ACTIVE',NOW(),'ADMIN'),
+(3,'Taxi','ACTIVE',NOW(),'ADMIN'),
+(4,'School Vehicle','ACTIVE',NOW(),'ADMIN'),
+(5,'Corporate Vehicle','ACTIVE',NOW(),'ADMIN'),
+
+(6,'Luxury Vehicle','ACTIVE',NOW(),'ADMIN'),
+(7,'Electric Vehicle','ACTIVE',NOW(),'ADMIN'),
+(8,'Hybrid Vehicle','ACTIVE',NOW(),'ADMIN'),
+(9,'Government Vehicle','ACTIVE',NOW(),'ADMIN'),
+(10,'Rental Vehicle','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_lov_master
+VALUES
+(1,'Gender','Male','ACTIVE',NOW(),'ADMIN'),
+(2,'Gender','Female','ACTIVE',NOW(),'ADMIN'),
+(3,'Gender','Other','ACTIVE',NOW(),'ADMIN'),
+(4,'Marital Status','Single','ACTIVE',NOW(),'ADMIN'),
+(5,'Marital Status','Married','ACTIVE',NOW(),'ADMIN'),
+
+(6,'Marital Status','Divorced','ACTIVE',NOW(),'ADMIN'),
+(7,'Education','SSLC','ACTIVE',NOW(),'ADMIN'),
+(8,'Education','HSC','ACTIVE',NOW(),'ADMIN'),
+(9,'Education','Diploma','ACTIVE',NOW(),'ADMIN'),
+(10,'Education','UG','ACTIVE',NOW(),'ADMIN'),
+
+(11,'Education','PG','ACTIVE',NOW(),'ADMIN'),
+(12,'Nationality','Indian','ACTIVE',NOW(),'ADMIN'),
+(13,'Payment Mode','Cash','ACTIVE',NOW(),'ADMIN'),
+(14,'Payment Mode','Credit Card','ACTIVE',NOW(),'ADMIN'),
+(15,'Payment Mode','Debit Card','ACTIVE',NOW(),'ADMIN'),
+
+(16,'Payment Mode','UPI','ACTIVE',NOW(),'ADMIN'),
+(17,'Payment Mode','Net Banking','ACTIVE',NOW(),'ADMIN'),
+(18,'Policy Status','ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(19,'Policy Status','EXPIRED','ACTIVE',NOW(),'ADMIN'),
+(20,'Policy Status','CANCELLED','ACTIVE',NOW(),'ADMIN'),
+
+(21,'Claim Status','SUBMITTED','ACTIVE',NOW(),'ADMIN'),
+(22,'Claim Status','APPROVED','ACTIVE',NOW(),'ADMIN'),
+(23,'Claim Status','REJECTED','ACTIVE',NOW(),'ADMIN'),
+(24,'Quote Status','DRAFT','ACTIVE',NOW(),'ADMIN'),
+(25,'Quote Status','APPROVED','ACTIVE',NOW(),'ADMIN'),
+
+(26,'Quote Status','REJECTED','ACTIVE',NOW(),'ADMIN'),
+(27,'User Status','ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(28,'User Status','INACTIVE','ACTIVE',NOW(),'ADMIN'),
+(29,'User Status','LOCKED','ACTIVE',NOW(),'ADMIN'),
+(30,'User Status','SUSPENDED','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_coverages
+VALUES
+(1,'Comprehensive Cover',
+'Full vehicle protection',
+'STANDARD',
+'ACTIVE',
+NOW(),
+'ADMIN'),
+
+(2,'Third Party Cover',
+'Third party liability protection',
+'STANDARD',
+'ACTIVE',
+NOW(),
+'ADMIN'),
+
+(3,'Own Damage Cover',
+'Damage to insured vehicle',
+'STANDARD',
+'ACTIVE',
+NOW(),
+'ADMIN'),
+
+(4,'Zero Depreciation',
+'No depreciation deduction',
+'ADDON',
+'ACTIVE',
+NOW(),
+'ADMIN'),
+
+(5,'Roadside Assistance',
+'24x7 roadside support',
+'ADDON',
+'ACTIVE',
+NOW(),
+'ADMIN'),
+
+(6,'Engine Protection',
+'Engine damage coverage',
+'ADDON',
+'ACTIVE',
+NOW(),
+'ADMIN'),
+
+(7,'Key Replacement',
+'Lost key replacement',
+'ADDON',
+'ACTIVE',
+NOW(),
+'ADMIN'),
+
+(8,'Consumables Cover',
+'Consumable expenses coverage',
+'ADDON',
+'ACTIVE',
+NOW(),
+'ADMIN'),
+
+(9,'Passenger Cover',
+'Passenger accident cover',
+'STANDARD',
+'ACTIVE',
+NOW(),
+'ADMIN'),
+
+(10,'Driver Cover',
+'Driver personal accident cover',
+'STANDARD',
+'ACTIVE',
+NOW(),
+'ADMIN'),
+
+(11,'Tyre Protection',
+'Tyre damage protection',
+'ADDON',
+'ACTIVE',
+NOW(),
+'ADMIN'),
+
+(12,'Return To Invoice',
+'Invoice value reimbursement',
+'ADDON',
+'ACTIVE',
+NOW(),
+'ADMIN'),
+
+(13,'Natural Disaster Cover',
+'Flood and cyclone protection',
+'STANDARD',
+'ACTIVE',
+NOW(),
+'ADMIN'),
+
+(14,'Fire Cover',
+'Fire accident protection',
+'STANDARD',
+'ACTIVE',
+NOW(),
+'ADMIN'),
+
+(15,'Theft Protection',
+'Vehicle theft coverage',
+'STANDARD',
+'ACTIVE',
+NOW(),
+'ADMIN');
+
+INSERT INTO mi_user_roles
+VALUES
+(1,'ADMIN','ACTIVE',NOW(),'ADMIN'),
+(2,'UNDERWRITER','ACTIVE',NOW(),'ADMIN'),
+(3,'OPERATIONAL_USER','ACTIVE',NOW(),'ADMIN'),
+(4,'BROKER','ACTIVE',NOW(),'ADMIN'),
+(5,'SALES_AGENT','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_users
+VALUES
+(1,1,'Rajesh','Kumar','Male','1985-05-12',
+'rajesh.admin@mi.com','9876500001',1,'AAD1001',
+'ACTIVE',NOW(),'ADMIN'),
+
+(2,1,'Priya','Sharma','Female','1988-08-20',
+'priya.admin@mi.com','9876500002',6,'AAD1002',
+'ACTIVE',NOW(),'ADMIN'),
+
+(3,1,'Arun','Prakash','Male','1987-03-15',
+'arun.admin@mi.com','9876500003',17,'AAD1003',
+'ACTIVE',NOW(),'ADMIN'),
+
+(4,1,'Deepa','Rani','Female','1986-11-10',
+'deepa.admin@mi.com','9876500004',35,'AAD1004',
+'ACTIVE',NOW(),'ADMIN'),
+
+(5,1,'Vijay','Kannan','Male','1984-09-25',
+'vijay.admin@mi.com','9876500005',39,'AAD1005',
+'ACTIVE',NOW(),'ADMIN'),
+
+(6,2,'Suresh','Babu','Male','1990-02-18',
+'suresh.uw@mi.com','9876500006',1,'AAD1006',
+'ACTIVE',NOW(),'ADMIN'),
+
+(7,2,'Anitha','Rao','Female','1991-04-14',
+'anitha.uw@mi.com','9876500007',6,'AAD1007',
+'ACTIVE',NOW(),'ADMIN'),
+
+(8,2,'Karthik','Raj','Male','1989-12-01',
+'karthik.uw@mi.com','9876500008',17,'AAD1008',
+'ACTIVE',NOW(),'ADMIN'),
+
+(9,2,'Meena','Krishnan','Female','1992-07-22',
+'meena.uw@mi.com','9876500009',35,'AAD1009',
+'ACTIVE',NOW(),'ADMIN'),
+
+(10,2,'Ramesh','Nair','Male','1988-06-11',
+'ramesh.uw@mi.com','9876500010',11,'AAD1010',
+'ACTIVE',NOW(),'ADMIN'),
+
+(11,2,'Divya','Menon','Female','1993-01-19',
+'divya.uw@mi.com','9876500011',12,'AAD1011',
+'ACTIVE',NOW(),'ADMIN'),
+
+(12,2,'Ajith','Varma','Male','1990-10-30',
+'ajith.uw@mi.com','9876500012',14,'AAD1012',
+'ACTIVE',NOW(),'ADMIN'),
+
+(13,2,'Keerthi','Das','Female','1991-09-17',
+'keerthi.uw@mi.com','9876500013',29,'AAD1013',
+'ACTIVE',NOW(),'ADMIN'),
+
+(14,2,'Praveen','Singh','Male','1989-08-09',
+'praveen.uw@mi.com','9876500014',42,'AAD1014',
+'ACTIVE',NOW(),'ADMIN'),
+
+(15,2,'Sneha','Patel','Female','1992-05-26',
+'sneha.uw@mi.com','9876500015',40,'AAD1015',
+'ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_users
+VALUES
+(16,3,'Manoj','Kumar','Male','1991-02-15','manoj.ops@mi.com','9876500016',2,'AAD1016','ACTIVE',NOW(),'ADMIN'),
+(17,3,'Lavanya','R','Female','1992-03-18','lavanya.ops@mi.com','9876500017',3,'AAD1017','ACTIVE',NOW(),'ADMIN'),
+(18,3,'Dinesh','Babu','Male','1990-07-20','dinesh.ops@mi.com','9876500018',4,'AAD1018','ACTIVE',NOW(),'ADMIN'),
+(19,3,'Kavitha','S','Female','1993-09-11','kavitha.ops@mi.com','9876500019',5,'AAD1019','ACTIVE',NOW(),'ADMIN'),
+(20,3,'Prakash','M','Male','1989-12-25','prakash.ops@mi.com','9876500020',6,'AAD1020','ACTIVE',NOW(),'ADMIN'),
+
+(21,3,'Nandhini','K','Female','1994-01-14','nandhini.ops@mi.com','9876500021',7,'AAD1021','ACTIVE',NOW(),'ADMIN'),
+(22,3,'Ravi','Shankar','Male','1991-08-08','ravi.ops@mi.com','9876500022',8,'AAD1022','ACTIVE',NOW(),'ADMIN'),
+(23,3,'Anu','Priya','Female','1992-06-19','anu.ops@mi.com','9876500023',9,'AAD1023','ACTIVE',NOW(),'ADMIN'),
+(24,3,'Saravanan','P','Male','1990-11-10','saravanan.ops@mi.com','9876500024',10,'AAD1024','ACTIVE',NOW(),'ADMIN'),
+(25,3,'Harini','V','Female','1995-04-22','harini.ops@mi.com','9876500025',11,'AAD1025','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_users
+VALUES
+(26,4,'Broker','One','Male','1985-05-01','broker1@mi.com','9876500026',1,'AAD1026','ACTIVE',NOW(),'ADMIN'),
+(27,4,'Broker','Two','Male','1984-06-02','broker2@mi.com','9876500027',6,'AAD1027','ACTIVE',NOW(),'ADMIN'),
+(28,4,'Broker','Three','Male','1983-07-03','broker3@mi.com','9876500028',17,'AAD1028','ACTIVE',NOW(),'ADMIN'),
+(29,4,'Broker','Four','Male','1982-08-04','broker4@mi.com','9876500029',35,'AAD1029','ACTIVE',NOW(),'ADMIN'),
+(30,4,'Broker','Five','Male','1981-09-05','broker5@mi.com','9876500030',39,'AAD1030','ACTIVE',NOW(),'ADMIN'),
+
+(31,4,'Broker','Six','Male','1985-10-06','broker6@mi.com','9876500031',42,'AAD1031','ACTIVE',NOW(),'ADMIN'),
+(32,4,'Broker','Seven','Male','1984-11-07','broker7@mi.com','9876500032',45,'AAD1032','ACTIVE',NOW(),'ADMIN'),
+(33,4,'Broker','Eight','Male','1983-12-08','broker8@mi.com','9876500033',29,'AAD1033','ACTIVE',NOW(),'ADMIN'),
+(34,4,'Broker','Nine','Male','1982-01-09','broker9@mi.com','9876500034',20,'AAD1034','ACTIVE',NOW(),'ADMIN'),
+(35,4,'Broker','Ten','Male','1981-02-10','broker10@mi.com','9876500035',36,'AAD1035','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_users
+VALUES
+(36,5,'Agent','One','Male','1992-01-01','agent1@mi.com','9876500036',1,'AAD1036','ACTIVE',NOW(),'ADMIN'),
+(37,5,'Agent','Two','Female','1993-02-02','agent2@mi.com','9876500037',2,'AAD1037','ACTIVE',NOW(),'ADMIN'),
+(38,5,'Agent','Three','Male','1994-03-03','agent3@mi.com','9876500038',3,'AAD1038','ACTIVE',NOW(),'ADMIN'),
+(39,5,'Agent','Four','Female','1995-04-04','agent4@mi.com','9876500039',4,'AAD1039','ACTIVE',NOW(),'ADMIN'),
+(40,5,'Agent','Five','Male','1992-05-05','agent5@mi.com','9876500040',5,'AAD1040','ACTIVE',NOW(),'ADMIN'),
+
+(41,5,'Agent','Six','Female','1993-06-06','agent6@mi.com','9876500041',6,'AAD1041','ACTIVE',NOW(),'ADMIN'),
+(42,5,'Agent','Seven','Male','1994-07-07','agent7@mi.com','9876500042',7,'AAD1042','ACTIVE',NOW(),'ADMIN'),
+(43,5,'Agent','Eight','Female','1995-08-08','agent8@mi.com','9876500043',8,'AAD1043','ACTIVE',NOW(),'ADMIN'),
+(44,5,'Agent','Nine','Male','1992-09-09','agent9@mi.com','9876500044',9,'AAD1044','ACTIVE',NOW(),'ADMIN'),
+(45,5,'Agent','Ten','Female','1993-10-10','agent10@mi.com','9876500045',10,'AAD1045','ACTIVE',NOW(),'ADMIN'),
+(46,5,'Agent','Eleven','Male','1994-11-11','agent11@mi.com','9876500046',11,'AAD1046','ACTIVE',NOW(),'ADMIN'),
+(47,5,'Agent','Twelve','Female','1995-12-12','agent12@mi.com','9876500047',12,'AAD1047','ACTIVE',NOW(),'ADMIN'),
+(48,5,'Agent','Thirteen','Male','1992-03-13','agent13@mi.com','9876500048',13,'AAD1048','ACTIVE',NOW(),'ADMIN'),
+(49,5,'Agent','Fourteen','Female','1993-04-14','agent14@mi.com','9876500049',14,'AAD1049','ACTIVE',NOW(),'ADMIN'),
+(50,5,'Agent','Fifteen','Male','1994-05-15','agent15@mi.com','9876500050',15,'AAD1050','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_brokers
+VALUES
+(1,26,'ABC Insurance Brokers',500000.00,'9877000001',1,'ACTIVE',NOW(),'ADMIN'),
+(2,27,'Secure Life Brokers',450000.00,'9877000002',6,'ACTIVE',NOW(),'ADMIN'),
+(3,28,'Trust Insurance Services',600000.00,'9877000003',17,'ACTIVE',NOW(),'ADMIN'),
+(4,29,'Prime Risk Brokers',550000.00,'9877000004',35,'ACTIVE',NOW(),'ADMIN'),
+(5,30,'Elite Insurance Hub',700000.00,'9877000005',39,'ACTIVE',NOW(),'ADMIN'),
+(6,31,'Future Secure Brokers',480000.00,'9877000006',42,'ACTIVE',NOW(),'ADMIN'),
+(7,32,'National Insurance Point',530000.00,'9877000007',45,'ACTIVE',NOW(),'ADMIN'),
+(8,33,'Smart Cover Solutions',620000.00,'9877000008',29,'ACTIVE',NOW(),'ADMIN'),
+(9,34,'Shield Insurance Services',470000.00,'9877000009',20,'ACTIVE',NOW(),'ADMIN'),
+(10,35,'Royal Insurance Associates',800000.00,'9877000010',36,'ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_sales_agents
+VALUES
+(1,1,36,'ACTIVE',NOW(),'ADMIN'),
+(2,1,37,'ACTIVE',NOW(),'ADMIN'),
+(3,2,38,'ACTIVE',NOW(),'ADMIN'),
+(4,2,39,'ACTIVE',NOW(),'ADMIN'),
+(5,3,40,'ACTIVE',NOW(),'ADMIN'),
+(6,3,41,'ACTIVE',NOW(),'ADMIN'),
+(7,4,42,'ACTIVE',NOW(),'ADMIN'),
+(8,5,43,'ACTIVE',NOW(),'ADMIN'),
+(9,6,44,'ACTIVE',NOW(),'ADMIN'),
+(10,7,45,'ACTIVE',NOW(),'ADMIN'),
+
+(11,8,46,'ACTIVE',NOW(),'ADMIN'),
+(12,8,47,'ACTIVE',NOW(),'ADMIN'),
+(13,9,48,'ACTIVE',NOW(),'ADMIN'),
+(14,10,49,'ACTIVE',NOW(),'ADMIN'),
+(15,10,50,'ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_login_users
+VALUES
+(1,1,'admin01','HASH_ADMIN_01',NULL,'ACTIVE',NOW(),'ADMIN'),
+(2,2,'admin02','HASH_ADMIN_02',NULL,'ACTIVE',NOW(),'ADMIN'),
+(3,3,'admin03','HASH_ADMIN_03',NULL,'ACTIVE',NOW(),'ADMIN'),
+(4,4,'admin04','HASH_ADMIN_04',NULL,'ACTIVE',NOW(),'ADMIN'),
+(5,5,'admin05','HASH_ADMIN_05',NULL,'ACTIVE',NOW(),'ADMIN'),
+(6,6,'uw01','HASH_UW_01',NULL,'ACTIVE',NOW(),'ADMIN'),
+(7,7,'uw02','HASH_UW_02',NULL,'ACTIVE',NOW(),'ADMIN'),
+(8,8,'uw03','HASH_UW_03',NULL,'ACTIVE',NOW(),'ADMIN'),
+(9,9,'uw04','HASH_UW_04',NULL,'ACTIVE',NOW(),'ADMIN'),
+(10,10,'uw05','HASH_UW_05',NULL,'ACTIVE',NOW(),'ADMIN'),
+
+(11,11,'uw06','HASH_UW_06',NULL,'ACTIVE',NOW(),'ADMIN'),
+(12,12,'uw07','HASH_UW_07',NULL,'ACTIVE',NOW(),'ADMIN'),
+(13,13,'uw08','HASH_UW_08',NULL,'ACTIVE',NOW(),'ADMIN'),
+(14,14,'uw09','HASH_UW_09',NULL,'ACTIVE',NOW(),'ADMIN'),
+(15,15,'uw10','HASH_UW_10',NULL,'ACTIVE',NOW(),'ADMIN'),
+(16,16,'ops01','HASH_OPS_01',NULL,'ACTIVE',NOW(),'ADMIN'),
+(17,17,'ops02','HASH_OPS_02',NULL,'ACTIVE',NOW(),'ADMIN'),
+(18,18,'ops03','HASH_OPS_03',NULL,'ACTIVE',NOW(),'ADMIN'),
+(19,19,'ops04','HASH_OPS_04',NULL,'ACTIVE',NOW(),'ADMIN'),
+(20,20,'ops05','HASH_OPS_05',NULL,'ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_customers
+VALUES
+(1,'Arun','Kumar','Male','1990-01-15','arun.kumar@gmail.com','9876000001','12 Gandhi Road','Anna Nagar',1,'PAN1001','ACTIVE',NOW(),'ADMIN'),
+(2,'Priya','Raman','Female','1992-03-22','priya.raman@gmail.com','9876000002','45 Nehru Street','T Nagar',1,'PAN1002','ACTIVE',NOW(),'ADMIN'),
+(3,'Karthik','Suresh','Male','1988-07-10','karthik.s@gmail.com','9876000003','18 Lake View Road','Velachery',1,'PAN1003','ACTIVE',NOW(),'ADMIN'),
+(4,'Divya','Lakshmi','Female','1995-05-12','divya.l@gmail.com','9876000004','67 Temple Street','Adyar',1,'PAN1004','ACTIVE',NOW(),'ADMIN'),
+(5,'Vignesh','Raj','Male','1991-08-20','vignesh.r@gmail.com','9876000005','23 Park Avenue','Tambaram',1,'PAN1005','ACTIVE',NOW(),'ADMIN'),
+(6,'Sathya','Priya','Female','1993-11-11','sathya.p@gmail.com','9876000006','9 Main Road','Coimbatore',2,'PAN1006','ACTIVE',NOW(),'ADMIN'),
+(7,'Ramesh','Babu','Male','1987-04-15','ramesh.b@gmail.com','9876000007','15 Cross Street','Coimbatore',2,'PAN1007','ACTIVE',NOW(),'ADMIN'),
+(8,'Anitha','Kumar','Female','1994-09-28','anitha.k@gmail.com','9876000008','40 Market Road','Madurai',3,'PAN1008','ACTIVE',NOW(),'ADMIN'),
+(9,'Prakash','Mohan','Male','1989-02-14','prakash.m@gmail.com','9876000009','77 South Street','Madurai',3,'PAN1009','ACTIVE',NOW(),'ADMIN'),
+(10,'Harini','Selvam','Female','1996-06-18','harini.s@gmail.com','9876000010','10 Gandhi Nagar','Salem',4,'PAN1010','ACTIVE',NOW(),'ADMIN'),
+
+(11,'Manoj','Kumar','Male','1990-12-05','manoj.k@gmail.com','9876000011','11 Anna Street','Trichy',5,'PAN1011','ACTIVE',NOW(),'ADMIN'),
+(12,'Lavanya','R','Female','1993-01-30','lavanya.r@gmail.com','9876000012','22 College Road','Trichy',5,'PAN1012','ACTIVE',NOW(),'ADMIN'),
+(13,'Rahul','Sharma','Male','1988-03-12','rahul.s@gmail.com','9876000013','33 MG Road','Bengaluru',6,'PAN1013','ACTIVE',NOW(),'ADMIN'),
+(14,'Pooja','Mehta','Female','1994-08-09','pooja.m@gmail.com','9876000014','44 Residency Road','Bengaluru',6,'PAN1014','ACTIVE',NOW(),'ADMIN'),
+(15,'Ajay','Patil','Male','1991-10-25','ajay.p@gmail.com','9876000015','55 Brigade Road','Bengaluru',6,'PAN1015','ACTIVE',NOW(),'ADMIN'),
+(16,'Sneha','Nair','Female','1992-07-17','sneha.n@gmail.com','9876000016','66 Temple Road','Mysuru',7,'PAN1016','ACTIVE',NOW(),'ADMIN'),
+(17,'Rohit','Verma','Male','1987-09-13','rohit.v@gmail.com','9876000017','77 Palace Road','Mysuru',7,'PAN1017','ACTIVE',NOW(),'ADMIN'),
+(18,'Keerthana','Das','Female','1995-11-05','keerthana.d@gmail.com','9876000018','88 Station Road','Mangalore',8,'PAN1018','ACTIVE',NOW(),'ADMIN'),
+(19,'Dinesh','Kumar','Male','1990-04-29','dinesh.k@gmail.com','9876000019','99 Beach Road','Mangalore',8,'PAN1019','ACTIVE',NOW(),'ADMIN'),
+(20,'Meera','Menon','Female','1993-06-22','meera.m@gmail.com','9876000020','12 Marine Drive','Kochi',11,'PAN1020','ACTIVE',NOW(),'ADMIN'),
+
+(21,'Arvind','Nair','Male','1989-08-11','arvind.n@gmail.com','9876000021','23 Harbour Road','Kochi',11,'PAN1021','ACTIVE',NOW(),'ADMIN'),
+(22,'Nandhini','Raj','Female','1994-02-08','nandhini.r@gmail.com','9876000022','34 Central Road','Hyderabad',17,'PAN1022','ACTIVE',NOW(),'ADMIN'),
+(23,'Vikram','Reddy','Male','1988-05-19','vikram.r@gmail.com','9876000023','45 Jubilee Hills','Hyderabad',17,'PAN1023','ACTIVE',NOW(),'ADMIN'),
+(24,'Shalini','Rao','Female','1995-03-16','shalini.r@gmail.com','9876000024','56 Banjara Hills','Hyderabad',17,'PAN1024','ACTIVE',NOW(),'ADMIN'),
+(25,'Kiran','Kumar','Male','1991-12-27','kiran.k@gmail.com','9876000025','67 City Center','Warangal',18,'PAN1025','ACTIVE',NOW(),'ADMIN');
+
+
+INSERT INTO mi_customers
+VALUES
+(26,'Srinivas','Rao','Male','1989-01-14','srinivas.r@gmail.com','9876000026','12 Beach Road','Visakhapatnam',14,'PAN1026','ACTIVE',NOW(),'ADMIN'),
+(27,'Lakshmi','Devi','Female','1993-05-21','lakshmi.d@gmail.com','9876000027','23 MVP Colony','Visakhapatnam',14,'PAN1027','ACTIVE',NOW(),'ADMIN'),
+(28,'Praveen','Kumar','Male','1991-09-18','praveen.k@gmail.com','9876000028','34 Benz Circle','Vijayawada',15,'PAN1028','ACTIVE',NOW(),'ADMIN'),
+(29,'Anusha','Reddy','Female','1994-12-10','anusha.r@gmail.com','9876000029','45 MG Road','Vijayawada',15,'PAN1029','ACTIVE',NOW(),'ADMIN'),
+(30,'Gopal','Krishna','Male','1988-07-07','gopal.k@gmail.com','9876000030','56 Ring Road','Guntur',16,'PAN1030','ACTIVE',NOW(),'ADMIN'),
+
+(31,'Amit','Shah','Male','1987-02-15','amit.s@gmail.com','9876000031','11 Andheri East','Mumbai',35,'PAN1031','ACTIVE',NOW(),'ADMIN'),
+(32,'Neha','Patel','Female','1992-04-19','neha.p@gmail.com','9876000032','22 Bandra West','Mumbai',35,'PAN1032','ACTIVE',NOW(),'ADMIN'),
+(33,'Rohan','Deshmukh','Male','1990-08-11','rohan.d@gmail.com','9876000033','33 Powai Lake','Mumbai',35,'PAN1033','ACTIVE',NOW(),'ADMIN'),
+(34,'Pallavi','Joshi','Female','1995-03-24','pallavi.j@gmail.com','9876000034','44 Shivaji Nagar','Pune',36,'PAN1034','ACTIVE',NOW(),'ADMIN'),
+(35,'Sagar','Kulkarni','Male','1991-10-17','sagar.k@gmail.com','9876000035','55 FC Road','Pune',36,'PAN1035','ACTIVE',NOW(),'ADMIN'),
+(36,'Vaibhav','Patil','Male','1989-11-09','vaibhav.p@gmail.com','9876000036','66 Deccan','Pune',36,'PAN1036','ACTIVE',NOW(),'ADMIN'),
+(37,'Snehal','More','Female','1994-06-05','snehal.m@gmail.com','9876000037','77 Sitabuldi','Nagpur',37,'PAN1037','ACTIVE',NOW(),'ADMIN'),
+(38,'Nikhil','Jain','Male','1992-02-22','nikhil.j@gmail.com','9876000038','88 Civil Lines','Nagpur',37,'PAN1038','ACTIVE',NOW(),'ADMIN'),
+(39,'Hardik','Patel','Male','1990-01-31','hardik.p@gmail.com','9876000039','10 SG Highway','Ahmedabad',39,'PAN1039','ACTIVE',NOW(),'ADMIN'),
+(40,'Bhavna','Shah','Female','1993-07-16','bhavna.s@gmail.com','9876000040','20 Navrangpura','Ahmedabad',39,'PAN1040','ACTIVE',NOW(),'ADMIN'),
+
+(41,'Jay','Mehta','Male','1988-09-27','jay.m@gmail.com','9876000041','30 Satellite Road','Ahmedabad',39,'PAN1041','ACTIVE',NOW(),'ADMIN'),
+(42,'Krupa','Patel','Female','1995-12-12','krupa.p@gmail.com','9876000042','40 Ring Road','Surat',40,'PAN1042','ACTIVE',NOW(),'ADMIN'),
+(43,'Mitesh','Shah','Male','1991-05-08','mitesh.s@gmail.com','9876000043','50 Textile Market','Surat',40,'PAN1043','ACTIVE',NOW(),'ADMIN'),
+(44,'Rajat','Singh','Male','1989-04-04','rajat.s@gmail.com','9876000044','12 MI Road','Jaipur',42,'PAN1044','ACTIVE',NOW(),'ADMIN'),
+(45,'Poonam','Sharma','Female','1994-08-18','poonam.s@gmail.com','9876000045','23 C Scheme','Jaipur',42,'PAN1045','ACTIVE',NOW(),'ADMIN'),
+(46,'Mohit','Verma','Male','1990-06-13','mohit.v@gmail.com','9876000046','34 Malviya Nagar','Jaipur',42,'PAN1046','ACTIVE',NOW(),'ADMIN'),
+(47,'Aakash','Gupta','Male','1988-10-20','aakash.g@gmail.com','9876000047','45 Connaught Place','New Delhi',20,'PAN1047','ACTIVE',NOW(),'ADMIN'),
+(48,'Ritu','Malhotra','Female','1993-03-09','ritu.m@gmail.com','9876000048','56 Karol Bagh','New Delhi',20,'PAN1048','ACTIVE',NOW(),'ADMIN'),
+(49,'Abhishek','Tiwari','Male','1991-11-14','abhishek.t@gmail.com','9876000049','67 Gomti Nagar','Lucknow',25,'PAN1049','ACTIVE',NOW(),'ADMIN'),
+(50,'Shreya','Mishra','Female','1995-01-25','shreya.m@gmail.com','9876000050','78 Hazratganj','Lucknow',25,'PAN1050','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_customers
+VALUES
+(51,'Sourav','Chatterjee','Male','1989-02-15','sourav.c@gmail.com','9876000051','12 Park Street','Kolkata',29,'PAN1051','ACTIVE',NOW(),'ADMIN'),
+(52,'Priyanka','Sen','Female','1993-06-18','priyanka.s@gmail.com','9876000052','23 Salt Lake','Kolkata',29,'PAN1052','ACTIVE',NOW(),'ADMIN'),
+(53,'Anirban','Roy','Male','1990-09-22','anirban.r@gmail.com','9876000053','34 Howrah Road','Howrah',30,'PAN1053','ACTIVE',NOW(),'ADMIN'),
+(54,'Riya','Das','Female','1995-01-12','riya.d@gmail.com','9876000054','45 Central Avenue','Kolkata',29,'PAN1054','ACTIVE',NOW(),'ADMIN'),
+(55,'Subhajit','Ghosh','Male','1988-11-07','subhajit.g@gmail.com','9876000055','56 Lake Town','Kolkata',29,'PAN1055','ACTIVE',NOW(),'ADMIN'),
+(56,'Bikash','Mohanty','Male','1991-04-10','bikash.m@gmail.com','9876000056','67 Janpath','Bhubaneswar',31,'PAN1056','ACTIVE',NOW(),'ADMIN'),
+(57,'Sasmita','Patnaik','Female','1994-08-25','sasmita.p@gmail.com','9876000057','78 Temple Road','Bhubaneswar',31,'PAN1057','ACTIVE',NOW(),'ADMIN'),
+(58,'Debasish','Sahoo','Male','1989-03-14','debasish.s@gmail.com','9876000058','89 Ring Road','Cuttack',32,'PAN1058','ACTIVE',NOW(),'ADMIN'),
+(59,'Rakesh','Kalita','Male','1990-07-19','rakesh.k@gmail.com','9876000059','11 GS Road','Guwahati',33,'PAN1059','ACTIVE',NOW(),'ADMIN'),
+(60,'Monalisa','Deka','Female','1995-10-05','monalisa.d@gmail.com','9876000060','22 Zoo Road','Guwahati',33,'PAN1060','ACTIVE',NOW(),'ADMIN'),
+
+(61,'Vikas','Yadav','Male','1988-05-20','vikas.y@gmail.com','9876000061','12 Civil Lines','Kanpur',26,'PAN1061','ACTIVE',NOW(),'ADMIN'),
+(62,'Neetu','Singh','Female','1993-09-09','neetu.s@gmail.com','9876000062','23 Mall Road','Kanpur',26,'PAN1062','ACTIVE',NOW(),'ADMIN'),
+(63,'Pankaj','Tiwari','Male','1991-12-15','pankaj.t@gmail.com','9876000063','34 Sector 18','Noida',27,'PAN1063','ACTIVE',NOW(),'ADMIN'),
+(64,'Sonal','Agarwal','Female','1994-04-24','sonal.a@gmail.com','9876000064','45 Film City','Noida',27,'PAN1064','ACTIVE',NOW(),'ADMIN'),
+(65,'Deepak','Sharma','Male','1987-08-11','deepak.s@gmail.com','9876000065','56 Taj Road','Agra',28,'PAN1065','ACTIVE',NOW(),'ADMIN'),
+(66,'Naveen','Joshi','Male','1990-02-08','naveen.j@gmail.com','9876000066','12 Race Course','Indore',46,'PAN1066','ACTIVE',NOW(),'ADMIN'),
+(67,'Pallavi','Gupta','Female','1995-06-30','pallavi.g@gmail.com','9876000067','23 Vijay Nagar','Indore',46,'PAN1067','ACTIVE',NOW(),'ADMIN'),
+(68,'Amit','Dubey','Male','1989-10-17','amit.d@gmail.com','9876000068','34 Arera Colony','Bhopal',45,'PAN1068','ACTIVE',NOW(),'ADMIN'),
+(69,'Shweta','Jain','Female','1993-01-27','shweta.j@gmail.com','9876000069','45 MP Nagar','Bhopal',45,'PAN1069','ACTIVE',NOW(),'ADMIN'),
+(70,'Kunal','Saxena','Male','1991-05-16','kunal.s@gmail.com','9876000070','56 Lashkar','Gwalior',47,'PAN1070','ACTIVE',NOW(),'ADMIN'),
+
+(71,'Rohit','Agrawal','Male','1988-07-22','rohit.a@gmail.com','9876000071','12 Shankar Nagar','Raipur',48,'PAN1071','ACTIVE',NOW(),'ADMIN'),
+(72,'Komal','Verma','Female','1994-11-13','komal.v@gmail.com','9876000072','23 Civil Lines','Raipur',48,'PAN1072','ACTIVE',NOW(),'ADMIN'),
+(73,'Sandeep','Mishra','Male','1990-03-05','sandeep.m@gmail.com','9876000073','34 Link Road','Bilaspur',49,'PAN1073','ACTIVE',NOW(),'ADMIN'),
+(74,'Anjali','Patel','Female','1995-08-18','anjali.p@gmail.com','9876000074','45 Station Road','Bilaspur',49,'PAN1074','ACTIVE',NOW(),'ADMIN'),
+(75,'Vivek','Tandon','Male','1989-12-21','vivek.t@gmail.com','9876000075','56 Main Market','Durg',50,'PAN1075','ACTIVE',NOW(),'ADMIN');
+
+
+
+INSERT INTO mi_customers
+VALUES
+(76,'Arjun','Menon','Male','1990-01-15','arjun.m@gmail.com','9876000076','12 MG Road','Kochi',11,'PAN1076','ACTIVE',NOW(),'ADMIN'),
+(77,'Nisha','Pillai','Female','1994-03-20','nisha.p@gmail.com','9876000077','23 Marine Drive','Kochi',11,'PAN1077','ACTIVE',NOW(),'ADMIN'),
+(78,'Sanjay','Nair','Male','1988-05-25','sanjay.n@gmail.com','9876000078','34 Beach Road','Kozhikode',13,'PAN1078','ACTIVE',NOW(),'ADMIN'),
+(79,'Aparna','Krishna','Female','1995-07-12','aparna.k@gmail.com','9876000079','45 Temple Street','Kozhikode',13,'PAN1079','ACTIVE',NOW(),'ADMIN'),
+(80,'Rahul','Joseph','Male','1991-09-08','rahul.j@gmail.com','9876000080','56 City Center','Thiruvananthapuram',12,'PAN1080','ACTIVE',NOW(),'ADMIN'),
+
+(81,'Tarun','Kapoor','Male','1989-02-18','tarun.k@gmail.com','9876000081','11 Sector 17','Gurugram',23,'PAN1081','ACTIVE',NOW(),'ADMIN'),
+(82,'Simran','Kaur','Female','1993-04-22','simran.k@gmail.com','9876000082','22 Cyber City','Gurugram',23,'PAN1082','ACTIVE',NOW(),'ADMIN'),
+(83,'Manpreet','Singh','Male','1990-06-30','manpreet.s@gmail.com','9876000083','33 Green Park','Faridabad',24,'PAN1083','ACTIVE',NOW(),'ADMIN'),
+(84,'Harpreet','Kaur','Female','1994-08-14','harpreet.k@gmail.com','9876000084','44 Metro Road','Faridabad',24,'PAN1084','ACTIVE',NOW(),'ADMIN'),
+(85,'Rajiv','Malhotra','Male','1988-10-10','rajiv.m@gmail.com','9876000085','55 Business Park','New Delhi',20,'PAN1085','ACTIVE',NOW(),'ADMIN'),
+(86,'Nitin','Arora','Male','1991-01-19','nitin.a@gmail.com','9876000086','12 Airport Road','Amritsar',21,'PAN1086','ACTIVE',NOW(),'ADMIN'),
+(87,'Jaspreet','Kaur','Female','1995-03-17','jaspreet.k@gmail.com','9876000087','23 Golden Temple Road','Amritsar',21,'PAN1087','ACTIVE',NOW(),'ADMIN'),
+(88,'Gurpreet','Singh','Male','1989-05-11','gurpreet.s@gmail.com','9876000088','34 Mall Road','Ludhiana',22,'PAN1088','ACTIVE',NOW(),'ADMIN'),
+(89,'Navneet','Kaur','Female','1994-07-23','navneet.k@gmail.com','9876000089','45 Model Town','Ludhiana',22,'PAN1089','ACTIVE',NOW(),'ADMIN'),
+(90,'Akash','Bora','Male','1990-09-09','akash.b@gmail.com','9876000090','12 Hill View','Guwahati',33,'PAN1090','ACTIVE',NOW(),'ADMIN'),
+
+(91,'Rupali','Saikia','Female','1993-11-04','rupali.s@gmail.com','9876000091','23 River Side','Guwahati',33,'PAN1091','ACTIVE',NOW(),'ADMIN'),
+(92,'Bharat','Das','Male','1988-12-15','bharat.d@gmail.com','9876000092','34 Tea Garden Road','Silchar',34,'PAN1092','ACTIVE',NOW(),'ADMIN'),
+(93,'Anupama','Roy','Female','1995-02-26','anupama.r@gmail.com','9876000093','45 College Road','Silchar',34,'PAN1093','ACTIVE',NOW(),'ADMIN'),
+(94,'Kishore','Patnaik','Male','1991-04-08','kishore.p@gmail.com','9876000094','56 Temple Road','Bhubaneswar',31,'PAN1094','ACTIVE',NOW(),'ADMIN'),
+(95,'Madhuri','Sahoo','Female','1994-06-16','madhuri.s@gmail.com','9876000095','67 Ring Road','Cuttack',32,'PAN1095','ACTIVE',NOW(),'ADMIN'),
+(96,'Lokesh','Reddy','Male','1989-08-20','lokesh.r@gmail.com','9876000096','12 IT Park','Hyderabad',17,'PAN1096','ACTIVE',NOW(),'ADMIN'),
+(97,'Bhavya','Rao','Female','1993-10-28','bhavya.r@gmail.com','9876000097','23 Jubilee Hills','Hyderabad',17,'PAN1097','ACTIVE',NOW(),'ADMIN'),
+(98,'Suresh','Naidu','Male','1990-12-05','suresh.n@gmail.com','9876000098','34 City Road','Visakhapatnam',14,'PAN1098','ACTIVE',NOW(),'ADMIN'),
+(99,'Keerthi','Reddy','Female','1995-01-30','keerthi.r@gmail.com','9876000099','45 Beach Road','Visakhapatnam',14,'PAN1099','ACTIVE',NOW(),'ADMIN'),
+(100,'Varun','Kumar','Male','1991-03-12','varun.k@gmail.com','9876000100','56 Central Avenue','Vijayawada',15,'PAN1100','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_vehicles
+VALUES
+(1,1,1,1,1,1,1,'TN01AB1001','CHS100001','ENG100001',2022,'ACTIVE',NOW(),'ADMIN'),
+(2,2,1,2,1,2,1,'TN01AB1002','CHS100002','ENG100002',2021,'ACTIVE',NOW(),'ADMIN'),
+(3,3,1,3,3,3,1,'TN01AB1003','CHS100003','ENG100003',2023,'ACTIVE',NOW(),'ADMIN'),
+(4,4,1,4,2,4,1,'TN01AB1004','CHS100004','ENG100004',2020,'ACTIVE',NOW(),'ADMIN'),
+(5,5,1,42,4,5,1,'TN01AB1005','CHS100005','ENG100005',2024,'ACTIVE',NOW(),'ADMIN'),
+(6,6,2,5,1,1,1,'TN38CD1006','CHS100006','ENG100006',2022,'ACTIVE',NOW(),'ADMIN'),
+(7,7,2,6,3,2,1,'TN38CD1007','CHS100007','ENG100007',2023,'ACTIVE',NOW(),'ADMIN'),
+(8,8,2,7,2,3,1,'TN58CD1008','CHS100008','ENG100008',2021,'ACTIVE',NOW(),'ADMIN'),
+(9,9,2,8,3,4,1,'TN58CD1009','CHS100009','ENG100009',2024,'ACTIVE',NOW(),'ADMIN'),
+(10,10,2,43,3,5,1,'TN30CD1010','CHS100010','ENG100010',2025,'ACTIVE',NOW(),'ADMIN'),
+
+(11,11,3,9,3,1,1,'TN48EF1011','CHS100011','ENG100011',2023,'ACTIVE',NOW(),'ADMIN'),
+(12,12,3,10,1,2,7,'TN48EF1012','CHS100012','ENG100012',2024,'ACTIVE',NOW(),'ADMIN'),
+(13,13,3,11,3,3,1,'KA01EF1013','CHS100013','ENG100013',2022,'ACTIVE',NOW(),'ADMIN'),
+(14,14,3,12,3,4,1,'KA01EF1014','CHS100014','ENG100014',2021,'ACTIVE',NOW(),'ADMIN'),
+(15,15,3,44,1,5,7,'KA01EF1015','CHS100015','ENG100015',2025,'ACTIVE',NOW(),'ADMIN'),
+(16,16,4,13,3,1,1,'KA09GH1016','CHS100016','ENG100016',2023,'ACTIVE',NOW(),'ADMIN'),
+(17,17,4,14,3,2,1,'KA09GH1017','CHS100017','ENG100017',2024,'ACTIVE',NOW(),'ADMIN'),
+(18,18,4,15,4,3,2,'KA19GH1018','CHS100018','ENG100018',2021,'ACTIVE',NOW(),'ADMIN'),
+(19,19,4,45,3,4,1,'KA19GH1019','CHS100019','ENG100019',2025,'ACTIVE',NOW(),'ADMIN'),
+(20,20,5,16,2,5,1,'KL07JK1020','CHS100020','ENG100020',2022,'ACTIVE',NOW(),'ADMIN'),
+
+(21,21,5,17,2,1,1,'KL07JK1021','CHS100021','ENG100021',2020,'ACTIVE',NOW(),'ADMIN'),
+(22,22,5,18,3,2,1,'TS09LM1022','CHS100022','ENG100022',2024,'ACTIVE',NOW(),'ADMIN'),
+(23,23,6,19,4,3,1,'TS09LM1023','CHS100023','ENG100023',2023,'ACTIVE',NOW(),'ADMIN'),
+(24,24,6,20,3,4,6,'TS09LM1024','CHS100024','ENG100024',2025,'ACTIVE',NOW(),'ADMIN'),
+(25,25,6,21,1,5,1,'TS03LM1025','CHS100025','ENG100025',2022,'ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_vehicles
+VALUES
+(26,26,7,22,3,1,1,'AP31KN1026','CHS100026','ENG100026',2024,'ACTIVE',NOW(),'ADMIN'),
+(27,27,7,23,3,2,1,'AP31KN1027','CHS100027','ENG100027',2023,'ACTIVE',NOW(),'ADMIN'),
+(28,28,7,24,4,3,1,'AP16KN1028','CHS100028','ENG100028',2025,'ACTIVE',NOW(),'ADMIN'),
+(29,29,7,48,3,4,7,'AP16KN1029','CHS100029','ENG100029',2024,'ACTIVE',NOW(),'ADMIN'),
+(30,30,8,25,1,5,1,'AP07PQ1030','CHS100030','ENG100030',2022,'ACTIVE',NOW(),'ADMIN'),
+
+(31,31,8,26,3,1,1,'MH01PQ1031','CHS100031','ENG100031',2023,'ACTIVE',NOW(),'ADMIN'),
+(32,32,8,27,4,2,1,'MH01PQ1032','CHS100032','ENG100032',2024,'ACTIVE',NOW(),'ADMIN'),
+(33,33,8,49,3,3,1,'MH02PQ1033','CHS100033','ENG100033',2021,'ACTIVE',NOW(),'ADMIN'),
+(34,34,9,28,3,4,1,'MH12RS1034','CHS100034','ENG100034',2025,'ACTIVE',NOW(),'ADMIN'),
+(35,35,9,50,2,5,1,'MH12RS1035','CHS100035','ENG100035',2020,'ACTIVE',NOW(),'ADMIN'),
+(36,36,10,29,2,1,1,'MH31TU1036','CHS100036','ENG100036',2024,'ACTIVE',NOW(),'ADMIN'),
+(37,37,10,30,3,2,1,'MH31TU1037','CHS100037','ENG100037',2025,'ACTIVE',NOW(),'ADMIN'),
+(38,38,11,31,2,3,1,'GJ01UV1038','CHS100038','ENG100038',2023,'ACTIVE',NOW(),'ADMIN'),
+(39,39,11,32,3,4,1,'GJ01UV1039','CHS100039','ENG100039',2024,'ACTIVE',NOW(),'ADMIN'),
+(40,40,12,33,3,5,1,'GJ27WX1040','CHS100040','ENG100040',2025,'ACTIVE',NOW(),'ADMIN'),
+
+(41,41,12,34,3,6,1,'GJ27WX1041','CHS100041','ENG100041',2023,'ACTIVE',NOW(),'ADMIN'),
+(42,42,13,35,3,7,6,'GJ05YZ1042','CHS100042','ENG100042',2024,'ACTIVE',NOW(),'ADMIN'),
+(43,43,14,36,10,2,6,'GJ05YZ1043','CHS100043','ENG100043',2025,'ACTIVE',NOW(),'ADMIN'),
+(44,44,14,37,10,1,6,'RJ14AA1044','CHS100044','ENG100044',2023,'ACTIVE',NOW(),'ADMIN'),
+(45,45,14,38,9,3,6,'RJ14AA1045','CHS100045','ENG100045',2022,'ACTIVE',NOW(),'ADMIN'),
+(46,46,15,39,9,2,6,'RJ14BB1046','CHS100046','ENG100046',2024,'ACTIVE',NOW(),'ADMIN'),
+(47,47,15,40,9,1,6,'DL01BB1047','CHS100047','ENG100047',2025,'ACTIVE',NOW(),'ADMIN'),
+(48,48,15,41,10,4,6,'DL01BB1048','CHS100048','ENG100048',2023,'ACTIVE',NOW(),'ADMIN'),
+(49,49,1,1,1,5,1,'UP32CC1049','CHS100049','ENG100049',2022,'ACTIVE',NOW(),'ADMIN'),
+(50,50,2,6,3,1,1,'UP32CC1050','CHS100050','ENG100050',2024,'ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_vehicles
+VALUES
+(51,51,3,9,3,2,1,'WB01DD1051','CHS100051','ENG100051',2023,'ACTIVE',NOW(),'ADMIN'),
+(52,52,3,10,1,3,7,'WB01DD1052','CHS100052','ENG100052',2024,'ACTIVE',NOW(),'ADMIN'),
+(53,53,4,13,3,4,1,'WB02DD1053','CHS100053','ENG100053',2025,'ACTIVE',NOW(),'ADMIN'),
+(54,54,4,14,3,5,1,'WB01DD1054','CHS100054','ENG100054',2022,'ACTIVE',NOW(),'ADMIN'),
+(55,55,5,16,2,1,1,'WB01DD1055','CHS100055','ENG100055',2023,'ACTIVE',NOW(),'ADMIN'),
+(56,56,5,17,2,2,1,'OD02EE1056','CHS100056','ENG100056',2024,'ACTIVE',NOW(),'ADMIN'),
+(57,57,6,19,4,3,1,'OD02EE1057','CHS100057','ENG100057',2025,'ACTIVE',NOW(),'ADMIN'),
+(58,58,6,20,3,4,6,'OD05EE1058','CHS100058','ENG100058',2023,'ACTIVE',NOW(),'ADMIN'),
+(59,59,7,22,3,5,1,'AS01FF1059','CHS100059','ENG100059',2024,'ACTIVE',NOW(),'ADMIN'),
+(60,60,7,23,3,1,1,'AS01FF1060','CHS100060','ENG100060',2025,'ACTIVE',NOW(),'ADMIN'),
+
+(61,61,8,25,1,2,1,'UP78GG1061','CHS100061','ENG100061',2022,'ACTIVE',NOW(),'ADMIN'),
+(62,62,8,26,3,3,1,'UP78GG1062','CHS100062','ENG100062',2023,'ACTIVE',NOW(),'ADMIN'),
+(63,63,9,28,3,4,1,'UP16GG1063','CHS100063','ENG100063',2024,'ACTIVE',NOW(),'ADMIN'),
+(64,64,10,29,2,5,1,'UP16GG1064','CHS100064','ENG100064',2025,'ACTIVE',NOW(),'ADMIN'),
+(65,65,10,30,3,1,1,'UP80GG1065','CHS100065','ENG100065',2021,'ACTIVE',NOW(),'ADMIN'),
+(66,66,11,31,2,2,1,'MP09HH1066','CHS100066','ENG100066',2024,'ACTIVE',NOW(),'ADMIN'),
+(67,67,11,32,3,3,1,'MP09HH1067','CHS100067','ENG100067',2025,'ACTIVE',NOW(),'ADMIN'),
+(68,68,12,33,3,4,1,'MP04HH1068','CHS100068','ENG100068',2023,'ACTIVE',NOW(),'ADMIN'),
+(69,69,12,34,3,5,1,'MP04HH1069','CHS100069','ENG100069',2024,'ACTIVE',NOW(),'ADMIN'),
+(70,70,13,35,3,1,6,'MP07HH1070','CHS100070','ENG100070',2025,'ACTIVE',NOW(),'ADMIN'),
+
+(71,71,14,36,10,2,6,'CG04JJ1071','CHS100071','ENG100071',2024,'ACTIVE',NOW(),'ADMIN'),
+(72,72,14,37,10,3,6,'CG04JJ1072','CHS100072','ENG100072',2023,'ACTIVE',NOW(),'ADMIN'),
+(73,73,14,38,9,4,6,'CG10JJ1073','CHS100073','ENG100073',2025,'ACTIVE',NOW(),'ADMIN'),
+(74,74,15,39,9,5,6,'CG10JJ1074','CHS100074','ENG100074',2024,'ACTIVE',NOW(),'ADMIN'),
+(75,75,15,40,9,1,6,'CG08JJ1075','CHS100075','ENG100075',2023,'ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_vehicles
+VALUES
+(76,76,1,2,1,2,1,'KL07KK1076','CHS100076','ENG100076',2024,'ACTIVE',NOW(),'ADMIN'),
+(77,77,1,3,3,3,1,'KL07KK1077','CHS100077','ENG100077',2025,'ACTIVE',NOW(),'ADMIN'),
+(78,78,2,5,1,4,1,'KL11KK1078','CHS100078','ENG100078',2023,'ACTIVE',NOW(),'ADMIN'),
+(79,79,2,6,3,5,1,'KL11KK1079','CHS100079','ENG100079',2024,'ACTIVE',NOW(),'ADMIN'),
+(80,80,3,9,3,1,1,'KL01KK1080','CHS100080','ENG100080',2025,'ACTIVE',NOW(),'ADMIN'),
+
+(81,81,4,13,3,2,1,'HR26LL1081','CHS100081','ENG100081',2024,'ACTIVE',NOW(),'ADMIN'),
+(82,82,4,14,3,3,1,'HR26LL1082','CHS100082','ENG100082',2025,'ACTIVE',NOW(),'ADMIN'),
+(83,83,5,16,2,4,1,'HR51LL1083','CHS100083','ENG100083',2023,'ACTIVE',NOW(),'ADMIN'),
+(84,84,5,17,2,5,1,'HR51LL1084','CHS100084','ENG100084',2024,'ACTIVE',NOW(),'ADMIN'),
+(85,85,6,19,4,1,1,'DL01MM1085','CHS100085','ENG100085',2025,'ACTIVE',NOW(),'ADMIN'),
+(86,86,7,22,3,2,1,'PB02NN1086','CHS100086','ENG100086',2024,'ACTIVE',NOW(),'ADMIN'),
+(87,87,7,23,3,3,1,'PB02NN1087','CHS100087','ENG100087',2023,'ACTIVE',NOW(),'ADMIN'),
+(88,88,8,25,1,4,1,'PB10NN1088','CHS100088','ENG100088',2025,'ACTIVE',NOW(),'ADMIN'),
+(89,89,8,26,3,5,1,'PB10NN1089','CHS100089','ENG100089',2024,'ACTIVE',NOW(),'ADMIN'),
+(90,90,9,28,3,1,1,'AS01PP1090','CHS100090','ENG100090',2023,'ACTIVE',NOW(),'ADMIN'),
+
+(91,91,10,29,2,2,1,'AS01PP1091','CHS100091','ENG100091',2025,'ACTIVE',NOW(),'ADMIN'),
+(92,92,10,30,3,3,1,'AS11PP1092','CHS100092','ENG100092',2024,'ACTIVE',NOW(),'ADMIN'),
+(93,93,11,31,2,4,1,'AS11PP1093','CHS100093','ENG100093',2023,'ACTIVE',NOW(),'ADMIN'),
+(94,94,11,32,3,5,1,'OD02QQ1094','CHS100094','ENG100094',2025,'ACTIVE',NOW(),'ADMIN'),
+(95,95,12,33,3,1,1,'OD05QQ1095','CHS100095','ENG100095',2024,'ACTIVE',NOW(),'ADMIN'),
+(96,96,12,34,3,2,1,'TS09RR1096','CHS100096','ENG100096',2025,'ACTIVE',NOW(),'ADMIN'),
+(97,97,13,35,3,3,6,'TS09RR1097','CHS100097','ENG100097',2024,'ACTIVE',NOW(),'ADMIN'),
+(98,98,14,36,10,4,6,'AP31SS1098','CHS100098','ENG100098',2025,'ACTIVE',NOW(),'ADMIN'),
+(99,99,15,39,9,5,6,'AP31SS1099','CHS100099','ENG100099',2024,'ACTIVE',NOW(),'ADMIN'),
+(100,100,15,40,9,1,6,'AP16SS1100','CHS100100','ENG100100',2025,'ACTIVE',NOW(),'ADMIN');
+
+
+INSERT INTO mi_quotes
+VALUES
+(1,1,1,1,1,'2026-01-05',10000,1800,11800,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(2,2,2,1,2,'2026-01-06',12000,2160,14160,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(3,3,3,2,3,'2026-01-07',15000,2700,17700,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(4,4,4,2,4,'2026-01-08',11000,1980,12980,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(5,5,5,3,5,'2026-01-09',18000,3240,21240,'REJECTED','ACTIVE',NOW(),'ADMIN'),
+(6,6,6,3,6,'2026-01-10',12500,2250,14750,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(7,7,7,4,7,'2026-01-11',13500,2430,15930,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(8,8,8,4,8,'2026-01-12',14000,2520,16520,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(9,9,9,5,9,'2026-01-13',15500,2790,18290,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(10,10,10,5,10,'2026-01-14',16500,2970,19470,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+
+(11,11,11,6,11,'2026-01-15',17000,3060,20060,'REJECTED','ACTIVE',NOW(),'ADMIN'),
+(12,12,12,6,12,'2026-01-16',14500,2610,17110,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(13,13,13,7,13,'2026-01-17',16000,2880,18880,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(14,14,14,7,14,'2026-01-18',17500,3150,20650,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(15,15,15,8,15,'2026-01-19',19000,3420,22420,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(16,16,16,8,1,'2026-01-20',13000,2340,15340,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(17,17,17,9,2,'2026-01-21',21000,3780,24780,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(18,18,18,9,3,'2026-01-22',22000,3960,25960,'REJECTED','ACTIVE',NOW(),'ADMIN'),
+(19,19,19,10,4,'2026-01-23',18500,3330,21830,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(20,20,20,10,5,'2026-01-24',19500,3510,23010,'PENDING','ACTIVE',NOW(),'ADMIN'),
+
+(21,21,21,1,6,'2026-01-25',20500,3690,24190,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(22,22,22,2,7,'2026-01-26',21500,3870,25370,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(23,23,23,3,8,'2026-01-27',22500,4050,26550,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(24,24,24,4,9,'2026-01-28',23500,4230,27730,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(25,25,25,5,10,'2026-01-29',24500,4410,28910,'APPROVED','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_quotes
+VALUES
+(26,26,26,6,11,'2026-01-30',15000,2700,17700,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(27,27,27,7,12,'2026-01-31',16500,2970,19470,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(28,28,28,8,13,'2026-02-01',18000,3240,21240,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(29,29,29,9,14,'2026-02-02',19500,3510,23010,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(30,30,30,10,15,'2026-02-03',21000,3780,24780,'REJECTED','ACTIVE',NOW(),'ADMIN'),
+
+(31,31,31,1,1,'2026-02-04',17500,3150,20650,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(32,32,32,2,2,'2026-02-05',18500,3330,21830,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(33,33,33,3,3,'2026-02-06',20000,3600,23600,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(34,34,34,4,4,'2026-02-07',22000,3960,25960,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(35,35,35,5,5,'2026-02-08',24000,4320,28320,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(36,36,36,6,6,'2026-02-09',16000,2880,18880,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(37,37,37,7,7,'2026-02-10',17000,3060,20060,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(38,38,38,8,8,'2026-02-11',19000,3420,22420,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(39,39,39,9,9,'2026-02-12',23000,4140,27140,'REJECTED','ACTIVE',NOW(),'ADMIN'),
+(40,40,40,10,10,'2026-02-13',25000,4500,29500,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+
+(41,41,41,1,11,'2026-02-14',18000,3240,21240,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(42,42,42,2,12,'2026-02-15',21000,3780,24780,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(43,43,43,3,13,'2026-02-16',26000,4680,30680,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(44,44,44,4,14,'2026-02-17',28000,5040,33040,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(45,45,45,5,15,'2026-02-18',30000,5400,35400,'REJECTED','ACTIVE',NOW(),'ADMIN'),
+(46,46,46,6,1,'2026-02-19',22000,3960,25960,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(47,47,47,7,2,'2026-02-20',24000,4320,28320,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(48,48,48,8,3,'2026-02-21',26000,4680,30680,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(49,49,49,9,4,'2026-02-22',18000,3240,21240,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(50,50,50,10,5,'2026-02-23',20000,3600,23600,'APPROVED','ACTIVE',NOW(),'ADMIN');
+
+
+INSERT INTO mi_quotes
+VALUES
+(51,51,51,1,6,'2026-02-24',21000,3780,24780,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(52,52,52,2,7,'2026-02-25',22000,3960,25960,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(53,53,53,3,8,'2026-02-26',23000,4140,27140,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(54,54,54,4,9,'2026-02-27',24000,4320,28320,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(55,55,55,5,10,'2026-02-28',25000,4500,29500,'REJECTED','ACTIVE',NOW(),'ADMIN'),
+(56,56,56,6,11,'2026-03-01',26000,4680,30680,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(57,57,57,7,12,'2026-03-02',27000,4860,31860,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(58,58,58,8,13,'2026-03-03',28000,5040,33040,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(59,59,59,9,14,'2026-03-04',29000,5220,34220,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(60,60,60,10,15,'2026-03-05',30000,5400,35400,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+
+(61,61,61,1,1,'2026-03-06',18500,3330,21830,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(62,62,62,2,2,'2026-03-07',19500,3510,23010,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(63,63,63,3,3,'2026-03-08',20500,3690,24190,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(64,64,64,4,4,'2026-03-09',21500,3870,25370,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(65,65,65,5,5,'2026-03-10',22500,4050,26550,'REJECTED','ACTIVE',NOW(),'ADMIN'),
+(66,66,66,6,6,'2026-03-11',23500,4230,27730,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(67,67,67,7,7,'2026-03-12',24500,4410,28910,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(68,68,68,8,8,'2026-03-13',25500,4590,30090,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(69,69,69,9,9,'2026-03-14',26500,4770,31270,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(70,70,70,10,10,'2026-03-15',27500,4950,32450,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+
+(71,71,71,1,11,'2026-03-16',28500,5130,33630,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(72,72,72,2,12,'2026-03-17',29500,5310,34810,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(73,73,73,3,13,'2026-03-18',30500,5490,35990,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(74,74,74,4,14,'2026-03-19',31500,5670,37170,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(75,75,75,5,15,'2026-03-20',32500,5850,38350,'REJECTED','ACTIVE',NOW(),'ADMIN');
+
+INSERT INTO mi_quotes
+VALUES
+(76,76,76,6,1,'2026-03-21',22000,3960,25960,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(77,77,77,7,2,'2026-03-22',23000,4140,27140,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(78,78,78,8,3,'2026-03-23',24000,4320,28320,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(79,79,79,9,4,'2026-03-24',25000,4500,29500,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(80,80,80,10,5,'2026-03-25',26000,4680,30680,'REJECTED','ACTIVE',NOW(),'ADMIN'),
+
+(81,81,81,1,6,'2026-03-26',27000,4860,31860,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(82,82,82,2,7,'2026-03-27',28000,5040,33040,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(83,83,83,3,8,'2026-03-28',29000,5220,34220,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(84,84,84,4,9,'2026-03-29',30000,5400,35400,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(85,85,85,5,10,'2026-03-30',31000,5580,36580,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(86,86,86,6,11,'2026-03-31',32000,5760,37760,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(87,87,87,7,12,'2026-04-01',33000,5940,38940,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(88,88,88,8,13,'2026-04-02',34000,6120,40120,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(89,89,89,9,14,'2026-04-03',35000,6300,41300,'REJECTED','ACTIVE',NOW(),'ADMIN'),
+(90,90,90,10,15,'2026-04-04',36000,6480,42480,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+
+(91,91,91,1,1,'2026-04-05',21000,3780,24780,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(92,92,92,2,2,'2026-04-06',22500,4050,26550,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(93,93,93,3,3,'2026-04-07',24000,4320,28320,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(94,94,94,4,4,'2026-04-08',25500,4590,30090,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(95,95,95,5,5,'2026-04-09',27000,4860,31860,'REJECTED','ACTIVE',NOW(),'ADMIN'),
+(96,96,96,6,6,'2026-04-10',28500,5130,33630,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(97,97,97,7,7,'2026-04-11',30000,5400,35400,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(98,98,98,8,8,'2026-04-12',31500,5670,37170,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(99,99,99,9,9,'2026-04-13',33000,5940,38940,'APPROVED','ACTIVE',NOW(),'ADMIN'),
+(100,100,100,10,10,'2026-04-14',34500,6210,40710,'APPROVED','ACTIVE',NOW(),'ADMIN');
+
+
+INSERT INTO mi_quote_coverages
+VALUES
+(1,1,1,500000,7000,NOW(),'ADMIN'),
+(2,2,1,550000,7500,NOW(),'ADMIN'),
+(3,3,1,600000,8000,NOW(),'ADMIN'),
+(4,4,1,650000,8500,NOW(),'ADMIN'),
+(5,5,1,700000,9000,NOW(),'ADMIN'),
+(6,6,1,750000,9500,NOW(),'ADMIN'),
+(7,7,1,800000,10000,NOW(),'ADMIN'),
+(8,8,1,850000,10500,NOW(),'ADMIN'),
+(9,9,1,900000,11000,NOW(),'ADMIN'),
+(10,10,1,950000,11500,NOW(),'ADMIN'),
+
+(11,11,1,500000,7000,NOW(),'ADMIN'),
+(12,12,1,550000,7500,NOW(),'ADMIN'),
+(13,13,1,600000,8000,NOW(),'ADMIN'),
+(14,14,1,650000,8500,NOW(),'ADMIN'),
+(15,15,1,700000,9000,NOW(),'ADMIN'),
+(16,16,1,750000,9500,NOW(),'ADMIN'),
+(17,17,1,800000,10000,NOW(),'ADMIN'),
+(18,18,1,850000,10500,NOW(),'ADMIN'),
+(19,19,1,900000,11000,NOW(),'ADMIN'),
+(20,20,1,950000,11500,NOW(),'ADMIN'),
+
+(21,21,1,500000,7000,NOW(),'ADMIN'),
+(22,22,1,550000,7500,NOW(),'ADMIN'),
+(23,23,1,600000,8000,NOW(),'ADMIN'),
+(24,24,1,650000,8500,NOW(),'ADMIN'),
+(25,25,1,700000,9000,NOW(),'ADMIN'),
+(26,26,1,750000,9500,NOW(),'ADMIN'),
+(27,27,1,800000,10000,NOW(),'ADMIN'),
+(28,28,1,850000,10500,NOW(),'ADMIN'),
+(29,29,1,900000,11000,NOW(),'ADMIN'),
+(30,30,1,950000,11500,NOW(),'ADMIN'),
+
+(31,31,1,500000,7000,NOW(),'ADMIN'),
+(32,32,1,550000,7500,NOW(),'ADMIN'),
+(33,33,1,600000,8000,NOW(),'ADMIN'),
+(34,34,1,650000,8500,NOW(),'ADMIN'),
+(35,35,1,700000,9000,NOW(),'ADMIN'),
+(36,36,1,750000,9500,NOW(),'ADMIN'),
+(37,37,1,800000,10000,NOW(),'ADMIN'),
+(38,38,1,850000,10500,NOW(),'ADMIN'),
+(39,39,1,900000,11000,NOW(),'ADMIN'),
+(40,40,1,950000,11500,NOW(),'ADMIN'),
+
+(41,41,1,500000,7000,NOW(),'ADMIN'),
+(42,42,1,550000,7500,NOW(),'ADMIN'),
+(43,43,1,600000,8000,NOW(),'ADMIN'),
+(44,44,1,650000,8500,NOW(),'ADMIN'),
+(45,45,1,700000,9000,NOW(),'ADMIN'),
+(46,46,1,750000,9500,NOW(),'ADMIN'),
+(47,47,1,800000,10000,NOW(),'ADMIN'),
+(48,48,1,850000,10500,NOW(),'ADMIN'),
+(49,49,1,900000,11000,NOW(),'ADMIN'),
+(50,50,1,950000,11500,NOW(),'ADMIN'),
+
+(51,51,1,500000,7000,NOW(),'ADMIN'),
+(52,52,1,550000,7500,NOW(),'ADMIN'),
+(53,53,1,600000,8000,NOW(),'ADMIN'),
+(54,54,1,650000,8500,NOW(),'ADMIN'),
+(55,55,1,700000,9000,NOW(),'ADMIN'),
+(56,56,1,750000,9500,NOW(),'ADMIN'),
+(57,57,1,800000,10000,NOW(),'ADMIN'),
+(58,58,1,850000,10500,NOW(),'ADMIN'),
+(59,59,1,900000,11000,NOW(),'ADMIN'),
+(60,60,1,950000,11500,NOW(),'ADMIN'),
+
+(61,61,1,500000,7000,NOW(),'ADMIN'),
+(62,62,1,550000,7500,NOW(),'ADMIN'),
+(63,63,1,600000,8000,NOW(),'ADMIN'),
+(64,64,1,650000,8500,NOW(),'ADMIN'),
+(65,65,1,700000,9000,NOW(),'ADMIN'),
+(66,66,1,750000,9500,NOW(),'ADMIN'),
+(67,67,1,800000,10000,NOW(),'ADMIN'),
+(68,68,1,850000,10500,NOW(),'ADMIN'),
+(69,69,1,900000,11000,NOW(),'ADMIN'),
+(70,70,1,950000,11500,NOW(),'ADMIN'),
+
+(71,71,1,500000,7000,NOW(),'ADMIN'),
+(72,72,1,550000,7500,NOW(),'ADMIN'),
+(73,73,1,600000,8000,NOW(),'ADMIN'),
+(74,74,1,650000,8500,NOW(),'ADMIN'),
+(75,75,1,700000,9000,NOW(),'ADMIN'),
+(76,76,1,750000,9500,NOW(),'ADMIN'),
+(77,77,1,800000,10000,NOW(),'ADMIN'),
+(78,78,1,850000,10500,NOW(),'ADMIN'),
+(79,79,1,900000,11000,NOW(),'ADMIN'),
+(80,80,1,950000,11500,NOW(),'ADMIN'),
+
+(81,81,1,500000,7000,NOW(),'ADMIN'),
+(82,82,1,550000,7500,NOW(),'ADMIN'),
+(83,83,1,600000,8000,NOW(),'ADMIN'),
+(84,84,1,650000,8500,NOW(),'ADMIN'),
+(85,85,1,700000,9000,NOW(),'ADMIN'),
+(86,86,1,750000,9500,NOW(),'ADMIN'),
+(87,87,1,800000,10000,NOW(),'ADMIN'),
+(88,88,1,850000,10500,NOW(),'ADMIN'),
+(89,89,1,900000,11000,NOW(),'ADMIN'),
+(90,90,1,950000,11500,NOW(),'ADMIN'),
+
+(91,91,1,500000,7000,NOW(),'ADMIN'),
+(92,92,1,550000,7500,NOW(),'ADMIN'),
+(93,93,1,600000,8000,NOW(),'ADMIN'),
+(94,94,1,650000,8500,NOW(),'ADMIN'),
+(95,95,1,700000,9000,NOW(),'ADMIN'),
+(96,96,1,750000,9500,NOW(),'ADMIN'),
+(97,97,1,800000,10000,NOW(),'ADMIN'),
+(98,98,1,850000,10500,NOW(),'ADMIN'),
+(99,99,1,900000,11000,NOW(),'ADMIN'),
+(100,100,1,950000,11500,NOW(),'ADMIN');
+
+
+INSERT INTO mi_quote_coverages
+VALUES
+(101,1,2,500000,1800,NOW(),'ADMIN'),
+(102,2,2,550000,1900,NOW(),'ADMIN'),
+(103,3,2,600000,2000,NOW(),'ADMIN'),
+(104,4,2,650000,2100,NOW(),'ADMIN'),
+(105,5,2,700000,2200,NOW(),'ADMIN'),
+(106,6,2,750000,2300,NOW(),'ADMIN'),
+(107,7,2,800000,2400,NOW(),'ADMIN'),
+(108,8,2,850000,2500,NOW(),'ADMIN'),
+(109,9,2,900000,2600,NOW(),'ADMIN'),
+(110,10,2,950000,2700,NOW(),'ADMIN'),
+
+(111,11,2,500000,1800,NOW(),'ADMIN'),
+(112,12,2,550000,1900,NOW(),'ADMIN'),
+(113,13,2,600000,2000,NOW(),'ADMIN'),
+(114,14,2,650000,2100,NOW(),'ADMIN'),
+(115,15,2,700000,2200,NOW(),'ADMIN'),
+(116,16,2,750000,2300,NOW(),'ADMIN'),
+(117,17,2,800000,2400,NOW(),'ADMIN'),
+(118,18,2,850000,2500,NOW(),'ADMIN'),
+(119,19,2,900000,2600,NOW(),'ADMIN'),
+(120,20,2,950000,2700,NOW(),'ADMIN'),
+
+(121,21,2,500000,1800,NOW(),'ADMIN'),
+(122,22,2,550000,1900,NOW(),'ADMIN'),
+(123,23,2,600000,2000,NOW(),'ADMIN'),
+(124,24,2,650000,2100,NOW(),'ADMIN'),
+(125,25,2,700000,2200,NOW(),'ADMIN'),
+(126,26,2,750000,2300,NOW(),'ADMIN'),
+(127,27,2,800000,2400,NOW(),'ADMIN'),
+(128,28,2,850000,2500,NOW(),'ADMIN'),
+(129,29,2,900000,2600,NOW(),'ADMIN'),
+(130,30,2,950000,2700,NOW(),'ADMIN'),
+
+(131,31,2,500000,1800,NOW(),'ADMIN'),
+(132,32,2,550000,1900,NOW(),'ADMIN'),
+(133,33,2,600000,2000,NOW(),'ADMIN'),
+(134,34,2,650000,2100,NOW(),'ADMIN'),
+(135,35,2,700000,2200,NOW(),'ADMIN'),
+(136,36,2,750000,2300,NOW(),'ADMIN'),
+(137,37,2,800000,2400,NOW(),'ADMIN'),
+(138,38,2,850000,2500,NOW(),'ADMIN'),
+(139,39,2,900000,2600,NOW(),'ADMIN'),
+(140,40,2,950000,2700,NOW(),'ADMIN'),
+
+(141,41,2,500000,1800,NOW(),'ADMIN'),
+(142,42,2,550000,1900,NOW(),'ADMIN'),
+(143,43,2,600000,2000,NOW(),'ADMIN'),
+(144,44,2,650000,2100,NOW(),'ADMIN'),
+(145,45,2,700000,2200,NOW(),'ADMIN'),
+(146,46,2,750000,2300,NOW(),'ADMIN'),
+(147,47,2,800000,2400,NOW(),'ADMIN'),
+(148,48,2,850000,2500,NOW(),'ADMIN'),
+(149,49,2,900000,2600,NOW(),'ADMIN'),
+(150,50,2,950000,2700,NOW(),'ADMIN'),
+
+(151,51,2,500000,1800,NOW(),'ADMIN'),
+(152,52,2,550000,1900,NOW(),'ADMIN'),
+(153,53,2,600000,2000,NOW(),'ADMIN'),
+(154,54,2,650000,2100,NOW(),'ADMIN'),
+(155,55,2,700000,2200,NOW(),'ADMIN'),
+(156,56,2,750000,2300,NOW(),'ADMIN'),
+(157,57,2,800000,2400,NOW(),'ADMIN'),
+(158,58,2,850000,2500,NOW(),'ADMIN'),
+(159,59,2,900000,2600,NOW(),'ADMIN'),
+(160,60,2,950000,2700,NOW(),'ADMIN'),
+
+(161,61,2,500000,1800,NOW(),'ADMIN'),
+(162,62,2,550000,1900,NOW(),'ADMIN'),
+(163,63,2,600000,2000,NOW(),'ADMIN'),
+(164,64,2,650000,2100,NOW(),'ADMIN'),
+(165,65,2,700000,2200,NOW(),'ADMIN'),
+(166,66,2,750000,2300,NOW(),'ADMIN'),
+(167,67,2,800000,2400,NOW(),'ADMIN'),
+(168,68,2,850000,2500,NOW(),'ADMIN'),
+(169,69,2,900000,2600,NOW(),'ADMIN'),
+(170,70,2,950000,2700,NOW(),'ADMIN'),
+
+(171,71,2,500000,1800,NOW(),'ADMIN'),
+(172,72,2,550000,1900,NOW(),'ADMIN'),
+(173,73,2,600000,2000,NOW(),'ADMIN'),
+(174,74,2,650000,2100,NOW(),'ADMIN'),
+(175,75,2,700000,2200,NOW(),'ADMIN'),
+(176,76,2,750000,2300,NOW(),'ADMIN'),
+(177,77,2,800000,2400,NOW(),'ADMIN'),
+(178,78,2,850000,2500,NOW(),'ADMIN'),
+(179,79,2,900000,2600,NOW(),'ADMIN'),
+(180,80,2,950000,2700,NOW(),'ADMIN'),
+
+(181,81,2,500000,1800,NOW(),'ADMIN'),
+(182,82,2,550000,1900,NOW(),'ADMIN'),
+(183,83,2,600000,2000,NOW(),'ADMIN'),
+(184,84,2,650000,2100,NOW(),'ADMIN'),
+(185,85,2,700000,2200,NOW(),'ADMIN'),
+(186,86,2,750000,2300,NOW(),'ADMIN'),
+(187,87,2,800000,2400,NOW(),'ADMIN'),
+(188,88,2,850000,2500,NOW(),'ADMIN'),
+(189,89,2,900000,2600,NOW(),'ADMIN'),
+(190,90,2,950000,2700,NOW(),'ADMIN'),
+
+(191,91,2,500000,1800,NOW(),'ADMIN'),
+(192,92,2,550000,1900,NOW(),'ADMIN'),
+(193,93,2,600000,2000,NOW(),'ADMIN'),
+(194,94,2,650000,2100,NOW(),'ADMIN'),
+(195,95,2,700000,2200,NOW(),'ADMIN'),
+(196,96,2,750000,2300,NOW(),'ADMIN'),
+(197,97,2,800000,2400,NOW(),'ADMIN'),
+(198,98,2,850000,2500,NOW(),'ADMIN'),
+(199,99,2,900000,2600,NOW(),'ADMIN'),
+(200,100,2,950000,2700,NOW(),'ADMIN');
+
+
+INSERT INTO mi_quote_coverages
+VALUES
+(201,1,3,500000,1500,NOW(),'ADMIN'),
+(202,2,3,550000,1600,NOW(),'ADMIN'),
+(203,3,3,600000,1700,NOW(),'ADMIN'),
+(204,4,3,650000,1800,NOW(),'ADMIN'),
+(205,5,3,700000,1900,NOW(),'ADMIN'),
+(206,6,3,750000,2000,NOW(),'ADMIN'),
+(207,7,3,800000,2100,NOW(),'ADMIN'),
+(208,8,3,850000,2200,NOW(),'ADMIN'),
+(209,9,3,900000,2300,NOW(),'ADMIN'),
+(210,10,3,950000,2400,NOW(),'ADMIN'),
+
+(211,11,3,500000,1500,NOW(),'ADMIN'),
+(212,12,3,550000,1600,NOW(),'ADMIN'),
+(213,13,3,600000,1700,NOW(),'ADMIN'),
+(214,14,3,650000,1800,NOW(),'ADMIN'),
+(215,15,3,700000,1900,NOW(),'ADMIN'),
+(216,16,3,750000,2000,NOW(),'ADMIN'),
+(217,17,3,800000,2100,NOW(),'ADMIN'),
+(218,18,3,850000,2200,NOW(),'ADMIN'),
+(219,19,3,900000,2300,NOW(),'ADMIN'),
+(220,20,3,950000,2400,NOW(),'ADMIN'),
+
+(221,21,3,500000,1500,NOW(),'ADMIN'),
+(222,22,3,550000,1600,NOW(),'ADMIN'),
+(223,23,3,600000,1700,NOW(),'ADMIN'),
+(224,24,3,650000,1800,NOW(),'ADMIN'),
+(225,25,3,700000,1900,NOW(),'ADMIN'),
+(226,26,3,750000,2000,NOW(),'ADMIN'),
+(227,27,3,800000,2100,NOW(),'ADMIN'),
+(228,28,3,850000,2200,NOW(),'ADMIN'),
+(229,29,3,900000,2300,NOW(),'ADMIN'),
+(230,30,3,950000,2400,NOW(),'ADMIN'),
+
+(231,31,3,500000,1500,NOW(),'ADMIN'),
+(232,32,3,550000,1600,NOW(),'ADMIN'),
+(233,33,3,600000,1700,NOW(),'ADMIN'),
+(234,34,3,650000,1800,NOW(),'ADMIN'),
+(235,35,3,700000,1900,NOW(),'ADMIN'),
+(236,36,3,750000,2000,NOW(),'ADMIN'),
+(237,37,3,800000,2100,NOW(),'ADMIN'),
+(238,38,3,850000,2200,NOW(),'ADMIN'),
+(239,39,3,900000,2300,NOW(),'ADMIN'),
+(240,40,3,950000,2400,NOW(),'ADMIN'),
+
+(241,41,3,500000,1500,NOW(),'ADMIN'),
+(242,42,3,550000,1600,NOW(),'ADMIN'),
+(243,43,3,600000,1700,NOW(),'ADMIN'),
+(244,44,3,650000,1800,NOW(),'ADMIN'),
+(245,45,3,700000,1900,NOW(),'ADMIN'),
+(246,46,3,750000,2000,NOW(),'ADMIN'),
+(247,47,3,800000,2100,NOW(),'ADMIN'),
+(248,48,3,850000,2200,NOW(),'ADMIN'),
+(249,49,3,900000,2300,NOW(),'ADMIN'),
+(250,50,3,950000,2400,NOW(),'ADMIN'),
+
+(251,51,3,500000,1500,NOW(),'ADMIN'),
+(252,52,3,550000,1600,NOW(),'ADMIN'),
+(253,53,3,600000,1700,NOW(),'ADMIN'),
+(254,54,3,650000,1800,NOW(),'ADMIN'),
+(255,55,3,700000,1900,NOW(),'ADMIN'),
+(256,56,3,750000,2000,NOW(),'ADMIN'),
+(257,57,3,800000,2100,NOW(),'ADMIN'),
+(258,58,3,850000,2200,NOW(),'ADMIN'),
+(259,59,3,900000,2300,NOW(),'ADMIN'),
+(260,60,3,950000,2400,NOW(),'ADMIN'),
+
+(261,61,3,500000,1500,NOW(),'ADMIN'),
+(262,62,3,550000,1600,NOW(),'ADMIN'),
+(263,63,3,600000,1700,NOW(),'ADMIN'),
+(264,64,3,650000,1800,NOW(),'ADMIN'),
+(265,65,3,700000,1900,NOW(),'ADMIN'),
+(266,66,3,750000,2000,NOW(),'ADMIN'),
+(267,67,3,800000,2100,NOW(),'ADMIN'),
+(268,68,3,850000,2200,NOW(),'ADMIN'),
+(269,69,3,900000,2300,NOW(),'ADMIN'),
+(270,70,3,950000,2400,NOW(),'ADMIN'),
+
+(271,71,3,500000,1500,NOW(),'ADMIN'),
+(272,72,3,550000,1600,NOW(),'ADMIN'),
+(273,73,3,600000,1700,NOW(),'ADMIN'),
+(274,74,3,650000,1800,NOW(),'ADMIN'),
+(275,75,3,700000,1900,NOW(),'ADMIN'),
+(276,76,3,750000,2000,NOW(),'ADMIN'),
+(277,77,3,800000,2100,NOW(),'ADMIN'),
+(278,78,3,850000,2200,NOW(),'ADMIN'),
+(279,79,3,900000,2300,NOW(),'ADMIN'),
+(280,80,3,950000,2400,NOW(),'ADMIN'),
+
+(281,81,3,500000,1500,NOW(),'ADMIN'),
+(282,82,3,550000,1600,NOW(),'ADMIN'),
+(283,83,3,600000,1700,NOW(),'ADMIN'),
+(284,84,3,650000,1800,NOW(),'ADMIN'),
+(285,85,3,700000,1900,NOW(),'ADMIN'),
+(286,86,3,750000,2000,NOW(),'ADMIN'),
+(287,87,3,800000,2100,NOW(),'ADMIN'),
+(288,88,3,850000,2200,NOW(),'ADMIN'),
+(289,89,3,900000,2300,NOW(),'ADMIN'),
+(290,90,3,950000,2400,NOW(),'ADMIN'),
+
+(291,91,3,500000,1500,NOW(),'ADMIN'),
+(292,92,3,550000,1600,NOW(),'ADMIN'),
+(293,93,3,600000,1700,NOW(),'ADMIN'),
+(294,94,3,650000,1800,NOW(),'ADMIN'),
+(295,95,3,700000,1900,NOW(),'ADMIN'),
+(296,96,3,750000,2000,NOW(),'ADMIN'),
+(297,97,3,800000,2100,NOW(),'ADMIN'),
+(298,98,3,850000,2200,NOW(),'ADMIN'),
+(299,99,3,900000,2300,NOW(),'ADMIN'),
+(300,100,3,950000,2400,NOW(),'ADMIN');
+
+
+
+INSERT INTO mi_premium_rates
+VALUES
+(1,1,1,0,5,2.50,'ACTIVE',NOW(),'ADMIN'),
+(2,1,2,0,5,1.20,'ACTIVE',NOW(),'ADMIN'),
+(3,1,3,0,5,0.80,'ACTIVE',NOW(),'ADMIN'),
+(4,1,4,0,5,0.60,'ACTIVE',NOW(),'ADMIN'),
+(5,1,5,0,5,0.70,'ACTIVE',NOW(),'ADMIN'),
+(6,2,1,0,5,2.80,'ACTIVE',NOW(),'ADMIN'),
+(7,2,2,0,5,1.30,'ACTIVE',NOW(),'ADMIN'),
+(8,2,3,0,5,0.90,'ACTIVE',NOW(),'ADMIN'),
+(9,2,4,0,5,0.70,'ACTIVE',NOW(),'ADMIN'),
+(10,2,5,0,5,0.80,'ACTIVE',NOW(),'ADMIN'),
+
+(11,3,1,0,5,3.00,'ACTIVE',NOW(),'ADMIN'),
+(12,3,2,0,5,1.40,'ACTIVE',NOW(),'ADMIN'),
+(13,3,3,0,5,1.00,'ACTIVE',NOW(),'ADMIN'),
+(14,3,4,0,5,0.80,'ACTIVE',NOW(),'ADMIN'),
+(15,3,5,0,5,0.90,'ACTIVE',NOW(),'ADMIN'),
+(16,4,1,0,5,3.20,'ACTIVE',NOW(),'ADMIN'),
+(17,4,2,0,5,1.50,'ACTIVE',NOW(),'ADMIN'),
+(18,4,3,0,5,1.10,'ACTIVE',NOW(),'ADMIN'),
+(19,4,4,0,5,0.90,'ACTIVE',NOW(),'ADMIN'),
+(20,4,5,0,5,1.00,'ACTIVE',NOW(),'ADMIN'),
+
+(21,5,1,0,5,3.40,'ACTIVE',NOW(),'ADMIN'),
+(22,5,2,0,5,1.60,'ACTIVE',NOW(),'ADMIN'),
+(23,5,3,0,5,1.20,'ACTIVE',NOW(),'ADMIN'),
+(24,5,4,0,5,1.00,'ACTIVE',NOW(),'ADMIN'),
+(25,5,5,0,5,1.10,'ACTIVE',NOW(),'ADMIN'),
+(26,6,1,0,5,3.60,'ACTIVE',NOW(),'ADMIN'),
+(27,6,2,0,5,1.70,'ACTIVE',NOW(),'ADMIN'),
+(28,6,3,0,5,1.30,'ACTIVE',NOW(),'ADMIN'),
+(29,6,4,0,5,1.10,'ACTIVE',NOW(),'ADMIN'),
+(30,6,5,0,5,1.20,'ACTIVE',NOW(),'ADMIN'),
+
+(31,7,1,0,5,3.80,'ACTIVE',NOW(),'ADMIN'),
+(32,7,2,0,5,1.80,'ACTIVE',NOW(),'ADMIN'),
+(33,7,3,0,5,1.40,'ACTIVE',NOW(),'ADMIN'),
+(34,7,4,0,5,1.20,'ACTIVE',NOW(),'ADMIN'),
+(35,7,5,0,5,1.30,'ACTIVE',NOW(),'ADMIN'),
+(36,8,1,0,5,4.00,'ACTIVE',NOW(),'ADMIN'),
+(37,8,2,0,5,1.90,'ACTIVE',NOW(),'ADMIN'),
+(38,8,3,0,5,1.50,'ACTIVE',NOW(),'ADMIN'),
+(39,8,4,0,5,1.30,'ACTIVE',NOW(),'ADMIN'),
+(40,8,5,0,5,1.40,'ACTIVE',NOW(),'ADMIN'),
+
+(41,9,1,0,5,4.20,'ACTIVE',NOW(),'ADMIN'),
+(42,9,2,0,5,2.00,'ACTIVE',NOW(),'ADMIN'),
+(43,9,3,0,5,1.60,'ACTIVE',NOW(),'ADMIN'),
+(44,9,4,0,5,1.40,'ACTIVE',NOW(),'ADMIN'),
+(45,9,5,0,5,1.50,'ACTIVE',NOW(),'ADMIN'),
+(46,10,1,0,5,4.50,'ACTIVE',NOW(),'ADMIN'),
+(47,10,2,0,5,2.10,'ACTIVE',NOW(),'ADMIN'),
+(48,10,3,0,5,1.70,'ACTIVE',NOW(),'ADMIN'),
+(49,10,4,0,5,1.50,'ACTIVE',NOW(),'ADMIN'),
+(50,10,5,0,5,1.60,'ACTIVE',NOW(),'ADMIN'),
+
+(51,1,1,6,10,3.00,'ACTIVE',NOW(),'ADMIN'),
+(52,1,2,6,10,1.40,'ACTIVE',NOW(),'ADMIN'),
+(53,1,3,6,10,1.00,'ACTIVE',NOW(),'ADMIN'),
+(54,1,4,6,10,0.80,'ACTIVE',NOW(),'ADMIN'),
+(55,1,5,6,10,0.90,'ACTIVE',NOW(),'ADMIN'),
+(56,2,1,6,10,3.20,'ACTIVE',NOW(),'ADMIN'),
+(57,2,2,6,10,1.50,'ACTIVE',NOW(),'ADMIN'),
+(58,2,3,6,10,1.10,'ACTIVE',NOW(),'ADMIN'),
+(59,2,4,6,10,0.90,'ACTIVE',NOW(),'ADMIN'),
+(60,2,5,6,10,1.00,'ACTIVE',NOW(),'ADMIN'),
+
+(61,3,1,6,10,3.40,'ACTIVE',NOW(),'ADMIN'),
+(62,3,2,6,10,1.60,'ACTIVE',NOW(),'ADMIN'),
+(63,3,3,6,10,1.20,'ACTIVE',NOW(),'ADMIN'),
+(64,3,4,6,10,1.00,'ACTIVE',NOW(),'ADMIN'),
+(65,3,5,6,10,1.10,'ACTIVE',NOW(),'ADMIN'),
+(66,4,1,6,10,3.60,'ACTIVE',NOW(),'ADMIN'),
+(67,4,2,6,10,1.70,'ACTIVE',NOW(),'ADMIN'),
+(68,4,3,6,10,1.30,'ACTIVE',NOW(),'ADMIN'),
+(69,4,4,6,10,1.10,'ACTIVE',NOW(),'ADMIN'),
+(70,4,5,6,10,1.20,'ACTIVE',NOW(),'ADMIN'),
+
+(71,5,1,6,10,3.80,'ACTIVE',NOW(),'ADMIN'),
+(72,5,2,6,10,1.80,'ACTIVE',NOW(),'ADMIN'),
+(73,5,3,6,10,1.40,'ACTIVE',NOW(),'ADMIN'),
+(74,5,4,6,10,1.20,'ACTIVE',NOW(),'ADMIN'),
+(75,5,5,6,10,1.30,'ACTIVE',NOW(),'ADMIN'),
+(76,6,1,6,10,4.00,'ACTIVE',NOW(),'ADMIN'),
+(77,6,2,6,10,1.90,'ACTIVE',NOW(),'ADMIN'),
+(78,6,3,6,10,1.50,'ACTIVE',NOW(),'ADMIN'),
+(79,6,4,6,10,1.30,'ACTIVE',NOW(),'ADMIN'),
+(80,6,5,6,10,1.40,'ACTIVE',NOW(),'ADMIN'),
+
+(81,7,1,6,10,4.20,'ACTIVE',NOW(),'ADMIN'),
+(82,7,2,6,10,2.00,'ACTIVE',NOW(),'ADMIN'),
+(83,7,3,6,10,1.60,'ACTIVE',NOW(),'ADMIN'),
+(84,7,4,6,10,1.40,'ACTIVE',NOW(),'ADMIN'),
+(85,7,5,6,10,1.50,'ACTIVE',NOW(),'ADMIN'),
+(86,8,1,6,10,4.40,'ACTIVE',NOW(),'ADMIN'),
+(87,8,2,6,10,2.10,'ACTIVE',NOW(),'ADMIN'),
+(88,8,3,6,10,1.70,'ACTIVE',NOW(),'ADMIN'),
+(89,8,4,6,10,1.50,'ACTIVE',NOW(),'ADMIN'),
+(90,8,5,6,10,1.60,'ACTIVE',NOW(),'ADMIN'),
+
+(91,9,1,6,10,4.60,'ACTIVE',NOW(),'ADMIN'),
+(92,9,2,6,10,2.20,'ACTIVE',NOW(),'ADMIN'),
+(93,9,3,6,10,1.80,'ACTIVE',NOW(),'ADMIN'),
+(94,9,4,6,10,1.60,'ACTIVE',NOW(),'ADMIN'),
+(95,9,5,6,10,1.70,'ACTIVE',NOW(),'ADMIN'),
+(96,10,1,6,10,4.80,'ACTIVE',NOW(),'ADMIN'),
+(97,10,2,6,10,2.30,'ACTIVE',NOW(),'ADMIN'),
+(98,10,3,6,10,1.90,'ACTIVE',NOW(),'ADMIN'),
+(99,10,4,6,10,1.70,'ACTIVE',NOW(),'ADMIN'),
+(100,10,5,6,10,1.80,'ACTIVE',NOW(),'ADMIN');
+
+
+INSERT INTO mi_payments
+VALUES
+(1,1,'2026-01-06',11800.00,'INR','UPI','TXN100001','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(2,2,'2026-01-07',14160.00,'INR','Credit Card','TXN100002','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(3,3,'2026-01-08',17700.00,'INR','Net Banking','TXN100003','PENDING','ACTIVE',NOW(),'ADMIN'),
+(4,4,'2026-01-09',12980.00,'INR','Debit Card','TXN100004','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(5,5,'2026-01-10',21240.00,'INR','UPI','TXN100005','FAILED','ACTIVE',NOW(),'ADMIN'),
+(6,6,'2026-01-11',14750.00,'INR','UPI','TXN100006','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(7,7,'2026-01-12',15930.00,'INR','Credit Card','TXN100007','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(8,8,'2026-01-13',16520.00,'INR','Net Banking','TXN100008','PENDING','ACTIVE',NOW(),'ADMIN'),
+(9,9,'2026-01-14',18290.00,'INR','Debit Card','TXN100009','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(10,10,'2026-01-15',19470.00,'INR','UPI','TXN100010','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+
+(11,11,'2026-01-16',20060.00,'INR','Credit Card','TXN100011','FAILED','ACTIVE',NOW(),'ADMIN'),
+(12,12,'2026-01-17',17110.00,'INR','UPI','TXN100012','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(13,13,'2026-01-18',18880.00,'INR','Net Banking','TXN100013','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(14,14,'2026-01-19',20650.00,'INR','Debit Card','TXN100014','PENDING','ACTIVE',NOW(),'ADMIN'),
+(15,15,'2026-01-20',22420.00,'INR','Credit Card','TXN100015','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(16,16,'2026-01-21',15340.00,'INR','UPI','TXN100016','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(17,17,'2026-01-22',24780.00,'INR','Net Banking','TXN100017','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(18,18,'2026-01-23',25960.00,'INR','Debit Card','TXN100018','FAILED','ACTIVE',NOW(),'ADMIN'),
+(19,19,'2026-01-24',21830.00,'INR','Credit Card','TXN100019','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(20,20,'2026-01-25',23010.00,'INR','UPI','TXN100020','PENDING','ACTIVE',NOW(),'ADMIN'),
+
+(21,21,'2026-01-26',24190.00,'INR','Net Banking','TXN100021','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(22,22,'2026-01-27',25370.00,'INR','Debit Card','TXN100022','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(23,23,'2026-01-28',26550.00,'INR','Credit Card','TXN100023','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(24,24,'2026-01-29',27730.00,'INR','UPI','TXN100024','PENDING','ACTIVE',NOW(),'ADMIN'),
+(25,25,'2026-01-30',28910.00,'INR','Net Banking','TXN100025','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(26,26,'2026-01-31',17700.00,'INR','Debit Card','TXN100026','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(27,27,'2026-02-01',19470.00,'INR','Credit Card','TXN100027','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(28,28,'2026-02-02',21240.00,'INR','UPI','TXN100028','PENDING','ACTIVE',NOW(),'ADMIN'),
+(29,29,'2026-02-03',23010.00,'INR','Net Banking','TXN100029','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(30,30,'2026-02-04',24780.00,'INR','Debit Card','TXN100030','FAILED','ACTIVE',NOW(),'ADMIN'),
+
+(31,31,'2026-02-05',20650.00,'INR','Credit Card','TXN100031','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(32,32,'2026-02-06',21830.00,'INR','UPI','TXN100032','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(33,33,'2026-02-07',23600.00,'INR','Net Banking','TXN100033','PENDING','ACTIVE',NOW(),'ADMIN'),
+(34,34,'2026-02-08',25960.00,'INR','Debit Card','TXN100034','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(35,35,'2026-02-09',28320.00,'INR','Credit Card','TXN100035','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(36,36,'2026-02-10',18880.00,'INR','UPI','TXN100036','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(37,37,'2026-02-11',20060.00,'INR','Net Banking','TXN100037','PENDING','ACTIVE',NOW(),'ADMIN'),
+(38,38,'2026-02-12',22420.00,'INR','Debit Card','TXN100038','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(39,39,'2026-02-13',27140.00,'INR','Credit Card','TXN100039','FAILED','ACTIVE',NOW(),'ADMIN'),
+(40,40,'2026-02-14',29500.00,'INR','UPI','TXN100040','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+
+(41,41,'2026-02-15',21240.00,'INR','Net Banking','TXN100041','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(42,42,'2026-02-16',24780.00,'INR','Debit Card','TXN100042','PENDING','ACTIVE',NOW(),'ADMIN'),
+(43,43,'2026-02-17',30680.00,'INR','Credit Card','TXN100043','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(44,44,'2026-02-18',33040.00,'INR','UPI','TXN100044','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(45,45,'2026-02-19',35400.00,'INR','Net Banking','TXN100045','FAILED','ACTIVE',NOW(),'ADMIN'),
+(46,46,'2026-02-20',25960.00,'INR','Debit Card','TXN100046','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(47,47,'2026-02-21',28320.00,'INR','Credit Card','TXN100047','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(48,48,'2026-02-22',30680.00,'INR','UPI','TXN100048','PENDING','ACTIVE',NOW(),'ADMIN'),
+(49,49,'2026-02-23',21240.00,'INR','Net Banking','TXN100049','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(50,50,'2026-02-24',23600.00,'INR','Debit Card','TXN100050','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+
+(51,51,'2026-02-25',24780.00,'INR','Credit Card','TXN100051','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(52,52,'2026-02-26',25960.00,'INR','UPI','TXN100052','PENDING','ACTIVE',NOW(),'ADMIN'),
+(53,53,'2026-02-27',27140.00,'INR','Net Banking','TXN100053','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(54,54,'2026-02-28',28320.00,'INR','Debit Card','TXN100054','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(55,55,'2026-03-01',29500.00,'INR','Credit Card','TXN100055','FAILED','ACTIVE',NOW(),'ADMIN'),
+(56,56,'2026-03-02',30680.00,'INR','UPI','TXN100056','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(57,57,'2026-03-03',31860.00,'INR','Net Banking','TXN100057','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(58,58,'2026-03-04',33040.00,'INR','Debit Card','TXN100058','PENDING','ACTIVE',NOW(),'ADMIN'),
+(59,59,'2026-03-05',34220.00,'INR','Credit Card','TXN100059','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(60,60,'2026-03-06',35400.00,'INR','UPI','TXN100060','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+
+(61,61,'2026-03-07',21830.00,'INR','Net Banking','TXN100061','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(62,62,'2026-03-08',23010.00,'INR','Debit Card','TXN100062','PENDING','ACTIVE',NOW(),'ADMIN'),
+(63,63,'2026-03-09',24190.00,'INR','Credit Card','TXN100063','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(64,64,'2026-03-10',25370.00,'INR','UPI','TXN100064','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(65,65,'2026-03-11',26550.00,'INR','Net Banking','TXN100065','FAILED','ACTIVE',NOW(),'ADMIN'),
+(66,66,'2026-03-12',27730.00,'INR','Debit Card','TXN100066','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(67,67,'2026-03-13',28910.00,'INR','Credit Card','TXN100067','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(68,68,'2026-03-14',30090.00,'INR','UPI','TXN100068','PENDING','ACTIVE',NOW(),'ADMIN'),
+(69,69,'2026-03-15',31270.00,'INR','Net Banking','TXN100069','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(70,70,'2026-03-16',32450.00,'INR','Debit Card','TXN100070','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+
+(71,71,'2026-03-17',33630.00,'INR','Credit Card','TXN100071','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(72,72,'2026-03-18',34810.00,'INR','UPI','TXN100072','PENDING','ACTIVE',NOW(),'ADMIN'),
+(73,73,'2026-03-19',35990.00,'INR','Net Banking','TXN100073','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(74,74,'2026-03-20',37170.00,'INR','Debit Card','TXN100074','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(75,75,'2026-03-21',38350.00,'INR','Credit Card','TXN100075','FAILED','ACTIVE',NOW(),'ADMIN'),
+(76,76,'2026-03-22',25960.00,'INR','UPI','TXN100076','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(77,77,'2026-03-23',27140.00,'INR','Net Banking','TXN100077','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(78,78,'2026-03-24',28320.00,'INR','Debit Card','TXN100078','PENDING','ACTIVE',NOW(),'ADMIN'),
+(79,79,'2026-03-25',29500.00,'INR','Credit Card','TXN100079','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(80,80,'2026-03-26',30680.00,'INR','UPI','TXN100080','FAILED','ACTIVE',NOW(),'ADMIN'),
+
+(81,81,'2026-03-27',31860.00,'INR','Net Banking','TXN100081','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(82,82,'2026-03-28',33040.00,'INR','Debit Card','TXN100082','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(83,83,'2026-03-29',34220.00,'INR','Credit Card','TXN100083','PENDING','ACTIVE',NOW(),'ADMIN'),
+(84,84,'2026-03-30',35400.00,'INR','UPI','TXN100084','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(85,85,'2026-03-31',36580.00,'INR','Net Banking','TXN100085','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(86,86,'2026-04-01',37760.00,'INR','Debit Card','TXN100086','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(87,87,'2026-04-02',38940.00,'INR','Credit Card','TXN100087','PENDING','ACTIVE',NOW(),'ADMIN'),
+(88,88,'2026-04-03',40120.00,'INR','UPI','TXN100088','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(89,89,'2026-04-04',41300.00,'INR','Net Banking','TXN100089','FAILED','ACTIVE',NOW(),'ADMIN'),
+(90,90,'2026-04-05',42480.00,'INR','Debit Card','TXN100090','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+
+(91,91,'2026-04-06',24780.00,'INR','Credit Card','TXN100091','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(92,92,'2026-04-07',26550.00,'INR','UPI','TXN100092','PENDING','ACTIVE',NOW(),'ADMIN'),
+(93,93,'2026-04-08',28320.00,'INR','Net Banking','TXN100093','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(94,94,'2026-04-09',30090.00,'INR','Debit Card','TXN100094','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(95,95,'2026-04-10',31860.00,'INR','Credit Card','TXN100095','FAILED','ACTIVE',NOW(),'ADMIN'),
+(96,96,'2026-04-11',33630.00,'INR','UPI','TXN100096','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(97,97,'2026-04-12',35400.00,'INR','Net Banking','TXN100097','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(98,98,'2026-04-13',37170.00,'INR','Debit Card','TXN100098','PENDING','ACTIVE',NOW(),'ADMIN'),
+(99,99,'2026-04-14',38940.00,'INR','Credit Card','TXN100099','SUCCESS','ACTIVE',NOW(),'ADMIN'),
+(100,100,'2026-04-15',40710.00,'INR','UPI','TXN100100','SUCCESS','ACTIVE',NOW(),'ADMIN');
+
+
+INSERT INTO mi_policies
+VALUES
+(1,1,'POL202600001','2026-01-06','2027-01-05',11800.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(2,2,'POL202600002','2026-01-07','2027-01-06',14160.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(3,3,'POL202600003','2026-01-08','2027-01-07',17700.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(4,4,'POL202600004','2026-01-09','2027-01-08',12980.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(5,5,'POL202600005','2026-01-10','2027-01-09',21240.00,'CANCELLED','ACTIVE',NOW(),'ADMIN'),
+(6,6,'POL202600006','2026-01-11','2027-01-10',14750.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(7,7,'POL202600007','2026-01-12','2027-01-11',15930.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(8,8,'POL202600008','2026-01-13','2027-01-12',16520.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(9,9,'POL202600009','2026-01-14','2027-01-13',18290.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(10,10,'POL202600010','2026-01-15','2027-01-14',19470.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+
+(11,11,'POL202600011','2026-01-16','2027-01-15',20060.00,'CANCELLED','ACTIVE',NOW(),'ADMIN'),
+(12,12,'POL202600012','2026-01-17','2027-01-16',17110.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(13,13,'POL202600013','2026-01-18','2027-01-17',18880.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(14,14,'POL202600014','2026-01-19','2027-01-18',20650.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(15,15,'POL202600015','2026-01-20','2027-01-19',22420.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(16,16,'POL202600016','2026-01-21','2027-01-20',15340.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(17,17,'POL202600017','2026-01-22','2027-01-21',24780.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(18,18,'POL202600018','2026-01-23','2027-01-22',25960.00,'CANCELLED','ACTIVE',NOW(),'ADMIN'),
+(19,19,'POL202600019','2026-01-24','2027-01-23',21830.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(20,20,'POL202600020','2026-01-25','2027-01-24',23010.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+
+(21,21,'POL202600021','2026-01-26','2027-01-25',24190.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(22,22,'POL202600022','2026-01-27','2027-01-26',25370.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(23,23,'POL202600023','2026-01-28','2027-01-27',26550.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(24,24,'POL202600024','2026-01-29','2027-01-28',27730.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(25,25,'POL202600025','2026-01-30','2027-01-29',28910.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(26,26,'POL202600026','2026-01-31','2027-01-30',17700.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(27,27,'POL202600027','2026-02-01','2027-01-31',19470.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(28,28,'POL202600028','2026-02-02','2027-02-01',21240.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(29,29,'POL202600029','2026-02-03','2027-02-02',23010.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(30,30,'POL202600030','2026-02-04','2027-02-03',24780.00,'CANCELLED','ACTIVE',NOW(),'ADMIN'),
+
+(31,31,'POL202600031','2026-02-05','2027-02-04',20650.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(32,32,'POL202600032','2026-02-06','2027-02-05',21830.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(33,33,'POL202600033','2026-02-07','2027-02-06',23600.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(34,34,'POL202600034','2026-02-08','2027-02-07',25960.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(35,35,'POL202600035','2026-02-09','2027-02-08',28320.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(36,36,'POL202600036','2026-02-10','2027-02-09',18880.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(37,37,'POL202600037','2026-02-11','2027-02-10',20060.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(38,38,'POL202600038','2026-02-12','2027-02-11',22420.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(39,39,'POL202600039','2026-02-13','2027-02-12',27140.00,'CANCELLED','ACTIVE',NOW(),'ADMIN'),
+(40,40,'POL202600040','2026-02-14','2027-02-13',29500.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+
+(41,41,'POL202600041','2026-02-15','2027-02-14',21240.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(42,42,'POL202600042','2026-02-16','2027-02-15',24780.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(43,43,'POL202600043','2026-02-17','2027-02-16',30680.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(44,44,'POL202600044','2026-02-18','2027-02-17',33040.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(45,45,'POL202600045','2026-02-19','2027-02-18',35400.00,'CANCELLED','ACTIVE',NOW(),'ADMIN'),
+(46,46,'POL202600046','2026-02-20','2027-02-19',25960.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(47,47,'POL202600047','2026-02-21','2027-02-20',28320.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(48,48,'POL202600048','2026-02-22','2027-02-21',30680.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(49,49,'POL202600049','2026-02-23','2027-02-22',21240.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(50,50,'POL202600050','2026-02-24','2027-02-23',23600.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+
+(51,51,'POL202600051','2026-02-25','2027-02-24',24780.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(52,52,'POL202600052','2026-02-26','2027-02-25',25960.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(53,53,'POL202600053','2026-02-27','2027-02-26',27140.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(54,54,'POL202600054','2026-02-28','2027-02-27',28320.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(55,55,'POL202600055','2026-03-01','2027-02-28',29500.00,'CANCELLED','ACTIVE',NOW(),'ADMIN'),
+(56,56,'POL202600056','2026-03-02','2027-03-01',30680.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(57,57,'POL202600057','2026-03-03','2027-03-02',31860.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(58,58,'POL202600058','2026-03-04','2027-03-03',33040.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(59,59,'POL202600059','2026-03-05','2027-03-04',34220.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(60,60,'POL202600060','2026-03-06','2027-03-05',35400.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+
+(61,61,'POL202600061','2026-03-07','2027-03-06',21830.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(62,62,'POL202600062','2026-03-08','2027-03-07',23010.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(63,63,'POL202600063','2026-03-09','2027-03-08',24190.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(64,64,'POL202600064','2026-03-10','2027-03-09',25370.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(65,65,'POL202600065','2026-03-11','2027-03-10',26550.00,'CANCELLED','ACTIVE',NOW(),'ADMIN'),
+(66,66,'POL202600066','2026-03-12','2027-03-11',27730.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(67,67,'POL202600067','2026-03-13','2027-03-12',28910.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(68,68,'POL202600068','2026-03-14','2027-03-13',30090.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(69,69,'POL202600069','2026-03-15','2027-03-14',31270.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(70,70,'POL202600070','2026-03-16','2027-03-15',32450.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+
+(71,71,'POL202600071','2026-03-17','2027-03-16',33630.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(72,72,'POL202600072','2026-03-18','2027-03-17',34810.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(73,73,'POL202600073','2026-03-19','2027-03-18',35990.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(74,74,'POL202600074','2026-03-20','2027-03-19',37170.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(75,75,'POL202600075','2026-03-21','2027-03-20',38350.00,'CANCELLED','ACTIVE',NOW(),'ADMIN'),
+(76,76,'POL202600076','2026-03-22','2027-03-21',25960.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(77,77,'POL202600077','2026-03-23','2027-03-22',27140.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(78,78,'POL202600078','2026-03-24','2027-03-23',28320.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(79,79,'POL202600079','2026-03-25','2027-03-24',29500.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(80,80,'POL202600080','2026-03-26','2027-03-25',30680.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+
+(81,81,'POL202600081','2026-03-27','2027-03-26',31860.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(82,82,'POL202600082','2026-03-28','2027-03-27',33040.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(83,83,'POL202600083','2026-03-29','2027-03-28',34220.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(84,84,'POL202600084','2026-03-30','2027-03-29',35400.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(85,85,'POL202600085','2026-03-31','2027-03-30',36580.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(86,86,'POL202600086','2026-04-01','2027-03-31',37760.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(87,87,'POL202600087','2026-04-02','2027-04-01',38940.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(88,88,'POL202600088','2026-04-03','2027-04-02',40120.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(89,89,'POL202600089','2026-04-04','2027-04-03',41300.00,'CANCELLED','ACTIVE',NOW(),'ADMIN'),
+(90,90,'POL202600090','2026-04-05','2027-04-04',42480.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+
+(91,91,'POL202600091','2026-04-06','2027-04-05',24780.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(92,92,'POL202600092','2026-04-07','2027-04-06',26550.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(93,93,'POL202600093','2026-04-08','2027-04-07',28320.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(94,94,'POL202600094','2026-04-09','2027-04-08',30090.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(95,95,'POL202600095','2026-04-10','2027-04-09',31860.00,'CANCELLED','ACTIVE',NOW(),'ADMIN'),
+(96,96,'POL202600096','2026-04-11','2027-04-10',33630.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(97,97,'POL202600097','2026-04-12','2027-04-11',35400.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(98,98,'POL202600098','2026-04-13','2027-04-12',37170.00,'PENDING','ACTIVE',NOW(),'ADMIN'),
+(99,99,'POL202600099','2026-04-14','2027-04-13',38940.00,'ACTIVE','ACTIVE',NOW(),'ADMIN'),
+(100,100,'POL202600100','2026-04-15','2027-04-14',40710.00,'ACTIVE','ACTIVE',NOW(),'ADMIN');
+
+
+INSERT INTO mi_claims
+VALUES
+(1,1,'2026-03-10',25000.00,'APPROVED','Minor front bumper damage','ACTIVE',NOW(),'ADMIN'),
+(2,2,'2026-03-11',18000.00,'PENDING','Windshield replacement','ACTIVE',NOW(),'ADMIN'),
+(3,3,'2026-03-12',42000.00,'UNDER REVIEW','Rear collision damage','ACTIVE',NOW(),'ADMIN'),
+(4,4,'2026-03-13',15000.00,'APPROVED','Side mirror and door repair','ACTIVE',NOW(),'ADMIN'),
+(5,5,'2026-03-14',36000.00,'REJECTED','Policy inactive during accident','ACTIVE',NOW(),'ADMIN'),
+(6,6,'2026-03-15',28000.00,'APPROVED','Flood damage','ACTIVE',NOW(),'ADMIN'),
+(7,7,'2026-03-16',19500.00,'PENDING','Glass replacement','ACTIVE',NOW(),'ADMIN'),
+(8,8,'2026-03-17',47000.00,'UNDER REVIEW','Engine damage','ACTIVE',NOW(),'ADMIN'),
+(9,9,'2026-03-18',23000.00,'APPROVED','Rear bumper replacement','ACTIVE',NOW(),'ADMIN'),
+(10,10,'2026-03-19',52000.00,'APPROVED','Major accident repair','ACTIVE',NOW(),'ADMIN'),
+
+(11,11,'2026-03-20',17000.00,'REJECTED','Documents incomplete','ACTIVE',NOW(),'ADMIN'),
+(12,12,'2026-03-21',21000.00,'APPROVED','Scratch and dent repair','ACTIVE',NOW(),'ADMIN'),
+(13,13,'2026-03-22',33000.00,'PENDING','Suspension damage','ACTIVE',NOW(),'ADMIN'),
+(14,14,'2026-03-23',48000.00,'UNDER REVIEW','Accident inspection pending','ACTIVE',NOW(),'ADMIN'),
+(15,15,'2026-03-24',26500.00,'APPROVED','Front grille replacement','ACTIVE',NOW(),'ADMIN'),
+(16,16,'2026-03-25',19500.00,'APPROVED','Tyre and alloy replacement','ACTIVE',NOW(),'ADMIN'),
+(17,17,'2026-03-26',41000.00,'PENDING','Engine overheating','ACTIVE',NOW(),'ADMIN'),
+(18,18,'2026-03-27',62000.00,'REJECTED','Fraud suspected','ACTIVE',NOW(),'ADMIN'),
+(19,19,'2026-03-28',27500.00,'APPROVED','Door replacement','ACTIVE',NOW(),'ADMIN'),
+(20,20,'2026-03-29',54000.00,'UNDER REVIEW','Complete body inspection','ACTIVE',NOW(),'ADMIN'),
+
+(21,21,'2026-03-30',18500.00,'APPROVED','Headlight replacement','ACTIVE',NOW(),'ADMIN'),
+(22,22,'2026-03-31',22500.00,'PENDING','Bonnet damage','ACTIVE',NOW(),'ADMIN'),
+(23,23,'2026-04-01',34500.00,'APPROVED','Rear door repair','ACTIVE',NOW(),'ADMIN'),
+(24,24,'2026-04-02',39500.00,'UNDER REVIEW','Roof damage','ACTIVE',NOW(),'ADMIN'),
+(25,25,'2026-04-03',51000.00,'APPROVED','Major collision','ACTIVE',NOW(),'ADMIN'),
+(26,26,'2026-04-04',16500.00,'APPROVED','Mirror replacement','ACTIVE',NOW(),'ADMIN'),
+(27,27,'2026-04-05',25500.00,'PENDING','Wheel alignment','ACTIVE',NOW(),'ADMIN'),
+(28,28,'2026-04-06',43000.00,'UNDER REVIEW','Gearbox damage','ACTIVE',NOW(),'ADMIN'),
+(29,29,'2026-04-07',28500.00,'APPROVED','Rear panel repair','ACTIVE',NOW(),'ADMIN'),
+(30,30,'2026-04-08',56500.00,'REJECTED','Late claim submission','ACTIVE',NOW(),'ADMIN'),
+
+(31,31,'2026-04-09',21000.00,'APPROVED','Paint work','ACTIVE',NOW(),'ADMIN'),
+(32,32,'2026-04-10',29500.00,'PENDING','Bumper replacement','ACTIVE',NOW(),'ADMIN'),
+(33,33,'2026-04-11',36000.00,'UNDER REVIEW','Engine inspection','ACTIVE',NOW(),'ADMIN'),
+(34,34,'2026-04-12',24500.00,'APPROVED','Door dent removal','ACTIVE',NOW(),'ADMIN'),
+(35,35,'2026-04-13',58000.00,'APPROVED','Complete body repair','ACTIVE',NOW(),'ADMIN'),
+(36,36,'2026-04-14',17500.00,'REJECTED','Coverage not available','ACTIVE',NOW(),'ADMIN'),
+(37,37,'2026-04-15',30500.00,'PENDING','Electrical issue','ACTIVE',NOW(),'ADMIN'),
+(38,38,'2026-04-16',45500.00,'UNDER REVIEW','Water damage','ACTIVE',NOW(),'ADMIN'),
+(39,39,'2026-04-17',32500.00,'APPROVED','Door replacement','ACTIVE',NOW(),'ADMIN'),
+(40,40,'2026-04-18',61000.00,'APPROVED','Major accident','ACTIVE',NOW(),'ADMIN'),
+
+(41,41,'2026-04-19',20500.00,'APPROVED','Windshield crack','ACTIVE',NOW(),'ADMIN'),
+(42,42,'2026-04-20',24000.00,'PENDING','Bonnet dent','ACTIVE',NOW(),'ADMIN'),
+(43,43,'2026-04-21',39000.00,'UNDER REVIEW','Engine claim','ACTIVE',NOW(),'ADMIN'),
+(44,44,'2026-04-22',27000.00,'APPROVED','Door repair','ACTIVE',NOW(),'ADMIN'),
+(45,45,'2026-04-23',65000.00,'REJECTED','Claim exceeded policy terms','ACTIVE',NOW(),'ADMIN'),
+(46,46,'2026-04-24',19500.00,'APPROVED','Side mirror replacement','ACTIVE',NOW(),'ADMIN'),
+(47,47,'2026-04-25',31500.00,'PENDING','Rear bumper damage','ACTIVE',NOW(),'ADMIN'),
+(48,48,'2026-04-26',47000.00,'UNDER REVIEW','Fire damage inspection','ACTIVE',NOW(),'ADMIN'),
+(49,49,'2026-04-27',28500.00,'APPROVED','Front door repair','ACTIVE',NOW(),'ADMIN'),
+(50,50,'2026-04-28',59000.00,'APPROVED','Major repair work','ACTIVE',NOW(),'ADMIN'),
+
+(51,51,'2026-04-29',21000.00,'APPROVED','Glass replacement','ACTIVE',NOW(),'ADMIN'),
+(52,52,'2026-04-30',33000.00,'PENDING','Wheel damage','ACTIVE',NOW(),'ADMIN'),
+(53,53,'2026-05-01',43000.00,'UNDER REVIEW','Gearbox inspection','ACTIVE',NOW(),'ADMIN'),
+(54,54,'2026-05-02',29500.00,'APPROVED','Door scratches','ACTIVE',NOW(),'ADMIN'),
+(55,55,'2026-05-03',60500.00,'REJECTED','Insufficient evidence','ACTIVE',NOW(),'ADMIN'),
+(56,56,'2026-05-04',18500.00,'APPROVED','Tyre replacement','ACTIVE',NOW(),'ADMIN'),
+(57,57,'2026-05-05',34000.00,'PENDING','Engine repair','ACTIVE',NOW(),'ADMIN'),
+(58,58,'2026-05-06',44500.00,'UNDER REVIEW','Electrical failure','ACTIVE',NOW(),'ADMIN'),
+(59,59,'2026-05-07',31500.00,'APPROVED','Bumper replacement','ACTIVE',NOW(),'ADMIN'),
+(60,60,'2026-05-08',62500.00,'APPROVED','Accident settlement','ACTIVE',NOW(),'ADMIN'),
+
+(61,61,'2026-05-09',22500.00,'APPROVED','Windshield replacement','ACTIVE',NOW(),'ADMIN'),
+(62,62,'2026-05-10',35500.00,'PENDING','Rear body damage','ACTIVE',NOW(),'ADMIN'),
+(63,63,'2026-05-11',46000.00,'UNDER REVIEW','Inspection ongoing','ACTIVE',NOW(),'ADMIN'),
+(64,64,'2026-05-12',32500.00,'APPROVED','Minor accident','ACTIVE',NOW(),'ADMIN'),
+(65,65,'2026-05-13',64000.00,'REJECTED','Policy expired','ACTIVE',NOW(),'ADMIN'),
+(66,66,'2026-05-14',20500.00,'APPROVED','Door replacement','ACTIVE',NOW(),'ADMIN'),
+(67,67,'2026-05-15',36500.00,'PENDING','Engine servicing','ACTIVE',NOW(),'ADMIN'),
+(68,68,'2026-05-16',48000.00,'UNDER REVIEW','Claim verification','ACTIVE',NOW(),'ADMIN'),
+(69,69,'2026-05-17',34500.00,'APPROVED','Front repair','ACTIVE',NOW(),'ADMIN'),
+(70,70,'2026-05-18',66000.00,'APPROVED','Major accident repair','ACTIVE',NOW(),'ADMIN'),
+
+(71,71,'2026-05-19',21500.00,'APPROVED','Headlight replacement','ACTIVE',NOW(),'ADMIN'),
+(72,72,'2026-05-20',37500.00,'PENDING','Suspension repair','ACTIVE',NOW(),'ADMIN'),
+(73,73,'2026-05-21',49000.00,'UNDER REVIEW','Inspection pending','ACTIVE',NOW(),'ADMIN'),
+(74,74,'2026-05-22',35500.00,'APPROVED','Body work','ACTIVE',NOW(),'ADMIN'),
+(75,75,'2026-05-23',67500.00,'REJECTED','Duplicate claim','ACTIVE',NOW(),'ADMIN'),
+(76,76,'2026-05-24',22500.00,'APPROVED','Glass damage','ACTIVE',NOW(),'ADMIN'),
+(77,77,'2026-05-25',38500.00,'PENDING','Engine oil leakage','ACTIVE',NOW(),'ADMIN'),
+(78,78,'2026-05-26',50500.00,'UNDER REVIEW','Flood inspection','ACTIVE',NOW(),'ADMIN'),
+(79,79,'2026-05-27',36500.00,'APPROVED','Front panel repair','ACTIVE',NOW(),'ADMIN'),
+(80,80,'2026-05-28',69000.00,'APPROVED','Major collision repair','ACTIVE',NOW(),'ADMIN'),
+
+(81,81,'2026-05-29',23500.00,'APPROVED','Rear light replacement','ACTIVE',NOW(),'ADMIN'),
+(82,82,'2026-05-30',39500.00,'PENDING','Door alignment','ACTIVE',NOW(),'ADMIN'),
+(83,83,'2026-05-31',52000.00,'UNDER REVIEW','Engine assessment','ACTIVE',NOW(),'ADMIN'),
+(84,84,'2026-06-01',37500.00,'APPROVED','Roof repair','ACTIVE',NOW(),'ADMIN'),
+(85,85,'2026-06-02',70500.00,'REJECTED','Outside policy coverage','ACTIVE',NOW(),'ADMIN'),
+(86,86,'2026-06-03',24500.00,'APPROVED','Mirror repair','ACTIVE',NOW(),'ADMIN'),
+(87,87,'2026-06-04',40500.00,'PENDING','Front bumper repair','ACTIVE',NOW(),'ADMIN'),
+(88,88,'2026-06-05',53500.00,'UNDER REVIEW','Vehicle inspection','ACTIVE',NOW(),'ADMIN'),
+(89,89,'2026-06-06',38500.00,'APPROVED','Body repair','ACTIVE',NOW(),'ADMIN'),
+(90,90,'2026-06-07',72000.00,'APPROVED','Major accidental damage','ACTIVE',NOW(),'ADMIN'),
+
+(91,91,'2026-06-08',25500.00,'APPROVED','Tyre replacement','ACTIVE',NOW(),'ADMIN'),
+(92,92,'2026-06-09',41500.00,'PENDING','Bonnet replacement','ACTIVE',NOW(),'ADMIN'),
+(93,93,'2026-06-10',55000.00,'UNDER REVIEW','Mechanical inspection','ACTIVE',NOW(),'ADMIN'),
+(94,94,'2026-06-11',39500.00,'APPROVED','Rear body repair','ACTIVE',NOW(),'ADMIN'),
+(95,95,'2026-06-12',73500.00,'REJECTED','Claim outside policy period','ACTIVE',NOW(),'ADMIN'),
+(96,96,'2026-06-13',26500.00,'APPROVED','Door replacement','ACTIVE',NOW(),'ADMIN'),
+(97,97,'2026-06-14',42500.00,'PENDING','Engine overhaul','ACTIVE',NOW(),'ADMIN'),
+(98,98,'2026-06-15',56500.00,'UNDER REVIEW','Surveyor verification','ACTIVE',NOW(),'ADMIN'),
+(99,99,'2026-06-16',40500.00,'APPROVED','Accident repair completed','ACTIVE',NOW(),'ADMIN'),
+(100,100,'2026-06-17',75000.00,'APPROVED','Complete vehicle restoration','ACTIVE',NOW(),'ADMIN');
+
+
+INSERT INTO mi_audit_log
+VALUES
+(1,'mi_users',1,'INSERT',NULL,'User Created','2026-01-01 09:00:00','ADMIN'),
+(2,'mi_users',2,'INSERT',NULL,'User Created','2026-01-01 09:05:00','ADMIN'),
+(3,'mi_customers',1,'INSERT',NULL,'Customer Registered','2026-01-02 10:00:00','ADMIN'),
+(4,'mi_customers',2,'INSERT',NULL,'Customer Registered','2026-01-02 10:15:00','ADMIN'),
+(5,'mi_vehicles',1,'INSERT',NULL,'Vehicle Added','2026-01-03 11:00:00','ADMIN'),
+(6,'mi_vehicles',2,'INSERT',NULL,'Vehicle Added','2026-01-03 11:20:00','ADMIN'),
+(7,'mi_quotes',1,'INSERT',NULL,'Quote Created','2026-01-04 09:30:00','ADMIN'),
+(8,'mi_quotes',2,'INSERT',NULL,'Quote Created','2026-01-04 09:45:00','ADMIN'),
+(9,'mi_quote_coverages',1,'INSERT',NULL,'Coverage Added','2026-01-04 10:15:00','ADMIN'),
+(10,'mi_quote_coverages',2,'INSERT',NULL,'Coverage Added','2026-01-04 10:30:00','ADMIN'),
+
+(11,'mi_quotes',3,'UPDATE','PENDING','APPROVED','2026-01-05 09:00:00','ADMIN'),
+(12,'mi_quotes',4,'UPDATE','PENDING','APPROVED','2026-01-05 09:10:00','ADMIN'),
+(13,'mi_payments',1,'INSERT',NULL,'Payment Received','2026-01-06 11:00:00','ADMIN'),
+(14,'mi_payments',2,'INSERT',NULL,'Payment Received','2026-01-06 11:20:00','ADMIN'),
+(15,'mi_policies',1,'INSERT',NULL,'Policy Issued','2026-01-07 09:00:00','ADMIN'),
+(16,'mi_policies',2,'INSERT',NULL,'Policy Issued','2026-01-07 09:15:00','ADMIN'),
+(17,'mi_claims',1,'INSERT',NULL,'Claim Registered','2026-03-10 12:00:00','ADMIN'),
+(18,'mi_claims',2,'INSERT',NULL,'Claim Registered','2026-03-11 12:20:00','ADMIN'),
+(19,'mi_claims',1,'UPDATE','PENDING','APPROVED','2026-03-15 15:30:00','CLAIMS_ADMIN'),
+(20,'mi_claims',2,'UPDATE','PENDING','REJECTED','2026-03-16 16:00:00','CLAIMS_ADMIN'),
+
+(21,'mi_users',3,'LOGIN',NULL,'Successful Login','2026-03-20 08:45:00','USER'),
+(22,'mi_users',4,'LOGIN',NULL,'Successful Login','2026-03-20 09:10:00','USER'),
+(23,'mi_users',5,'LOGIN_FAILED',NULL,'Invalid Password','2026-03-20 09:30:00','SYSTEM'),
+(24,'mi_customers',5,'UPDATE','Old Mobile','New Mobile','2026-03-21 10:20:00','ADMIN'),
+(25,'mi_customers',6,'UPDATE','Old Address','New Address','2026-03-21 10:45:00','ADMIN'),
+(26,'mi_vehicles',5,'UPDATE','Old Color','Black','2026-03-22 11:10:00','ADMIN'),
+(27,'mi_vehicles',6,'UPDATE','White','Blue','2026-03-22 11:30:00','ADMIN'),
+(28,'mi_quotes',10,'DELETE','Draft Quote',NULL,'2026-03-23 14:00:00','ADMIN'),
+(29,'mi_quotes',11,'INSERT',NULL,'Quote Created','2026-03-23 14:20:00','ADMIN'),
+(30,'mi_payments',5,'UPDATE','PENDING','SUCCESS','2026-03-24 09:00:00','ACCOUNTANT'),
+
+(31,'mi_payments',6,'UPDATE','FAILED','SUCCESS','2026-03-24 09:20:00','ACCOUNTANT'),
+(32,'mi_policies',5,'UPDATE','PENDING','ACTIVE','2026-03-25 10:00:00','ADMIN'),
+(33,'mi_policies',6,'UPDATE','ACTIVE','CANCELLED','2026-03-25 10:30:00','ADMIN'),
+(34,'mi_claims',5,'UPDATE','UNDER REVIEW','APPROVED','2026-03-26 11:15:00','CLAIMS_ADMIN'),
+(35,'mi_claims',6,'UPDATE','UNDER REVIEW','REJECTED','2026-03-26 11:40:00','CLAIMS_ADMIN'),
+(36,'mi_users',7,'PASSWORD_CHANGE',NULL,'Password Updated','2026-03-27 09:00:00','USER'),
+(37,'mi_users',8,'PASSWORD_CHANGE',NULL,'Password Updated','2026-03-27 09:30:00','USER'),
+(38,'mi_users',9,'LOGOUT',NULL,'User Logged Out','2026-03-27 17:00:00','USER'),
+(39,'mi_users',10,'LOGOUT',NULL,'User Logged Out','2026-03-27 17:10:00','USER'),
+(40,'mi_customers',8,'DELETE','Customer Record',NULL,'2026-03-28 15:30:00','ADMIN'),
+
+(41,'mi_quotes',15,'UPDATE','PENDING','APPROVED','2026-03-29 09:00:00','ADMIN'),
+(42,'mi_quotes',16,'UPDATE','PENDING','REJECTED','2026-03-29 09:20:00','ADMIN'),
+(43,'mi_payments',10,'INSERT',NULL,'Payment Received','2026-03-30 10:00:00','ACCOUNTANT'),
+(44,'mi_policies',10,'INSERT',NULL,'Policy Issued','2026-03-30 10:30:00','ADMIN'),
+(45,'mi_claims',10,'INSERT',NULL,'Claim Registered','2026-04-01 09:45:00','CLAIMS_ADMIN'),
+(46,'mi_claims',10,'UPDATE','PENDING','APPROVED','2026-04-05 11:20:00','CLAIMS_ADMIN'),
+(47,'mi_users',15,'LOGIN',NULL,'Successful Login','2026-04-06 08:30:00','BROKER'),
+(48,'mi_users',16,'LOGIN',NULL,'Successful Login','2026-04-06 08:40:00','AGENT'),
+(49,'mi_users',17,'LOGIN_FAILED',NULL,'Account Locked','2026-04-06 09:00:00','SYSTEM'),
+(50,'mi_policies',20,'RENEWAL','2026 Policy','2027 Policy','2026-12-20 10:00:00','ADMIN');
+
+
+-- ==========================================================
+-- VIEW 1
+-- Customer Policy History
+-- ==========================================================
+
+CREATE VIEW view_customer_policy_history AS
+SELECT
+    c.customer_id,
+    CONCAT(c.first_name,' ',c.last_name) AS customer_name,
+    c.mobile,
+    q.quote_id,
+    q.quote_date,
+    q.final_premium,
+    p.policy_number,
+    p.policy_start_date,
+    p.policy_end_date,
+    p.policy_status,
+    CASE
+        WHEN p.policy_status = 'ACTIVE'
+        THEN 'VALID POLICY'
+        ELSE 'EXPIRED POLICY'
+    END AS policy_condition
+FROM mi_customers c
+INNER JOIN mi_quotes q
+ON c.customer_id = q.customer_id
+INNER JOIN mi_policies p
+ON q.quote_id = p.quote_id
+WHERE c.status = 'ACTIVE';
+
+
+
+-- ==========================================================
+-- VIEW 2
+-- Broker Business Report
+-- ==========================================================
+
+CREATE VIEW view_broker_business_report AS
+SELECT
+    b.broker_id,
+    b.organization_name,
+    COUNT(DISTINCT q.quote_id) AS total_quotes,
+    COUNT(DISTINCT p.policy_id) AS total_policies,
+    SUM(p.premium_amount) AS total_premium_amount,
+    CASE
+        WHEN SUM(p.premium_amount) >= 100000
+        THEN 'HIGH BUSINESS'
+        WHEN SUM(p.premium_amount) >= 50000
+        THEN 'MEDIUM BUSINESS'
+        ELSE 'LOW BUSINESS'
+    END AS business_category
+FROM mi_brokers b
+LEFT JOIN mi_quotes q
+ON b.broker_id = q.broker_id
+LEFT JOIN mi_policies p
+ON q.quote_id = p.quote_id
+WHERE b.status = 'ACTIVE'
+GROUP BY
+    b.broker_id,
+    b.organization_name
+ORDER BY total_premium_amount DESC;
+
+
+
+-- ==========================================================
+-- VIEW 3
+-- Customer Payment History
+-- ==========================================================
+
+CREATE VIEW view_customer_payment_history AS
+SELECT
+    c.customer_id,
+    CONCAT(c.first_name,' ',c.last_name) AS customer_name,
+    q.quote_id,
+    pay.payment_id,
+    pay.amount,
+    pay.payment_mode,
+    pay.payment_date,
+    pay.payment_status
+FROM mi_customers c
+INNER JOIN mi_quotes q
+ON c.customer_id = q.customer_id
+INNER JOIN mi_payments pay
+ON q.quote_id = pay.quote_id
+WHERE pay.payment_status = 'SUCCESS'
+ORDER BY pay.payment_date DESC;
+
+
+-- Views Verification Code
+
+SELECT * FROM view_customer_policy_history;
+
+SELECT * FROM view_broker_business_report;
+
+SELECT * FROM view_claim_summary_report;
+
+
+-- ==========================================================
+-- INDEX 1
+-- ==========================================================
+
+CREATE INDEX index_mi_quotes_customer_id
+ON mi_quotes(customer_id);
+
+
+-- ==========================================================
+-- INDEX 2
+-- ==========================================================
+
+CREATE INDEX index_mi_policies_policy_number
+ON mi_policies(policy_number);
+
+
+
+-- ==========================================================
+-- INDEX 3
+-- ==========================================================
+
+CREATE INDEX index_mi_payments_quote_id
+ON mi_payments(quote_id);
+
+-- Index Verification
+
+SHOW INDEX FROM mi_customers;
+
+SHOW INDEX FROM mi_policies;
+
+SHOW INDEX FROM mi_quotes;
+
+
+-- ==========================================================
+-- FUNCTION 1
+-- Calculate Total Premium
+-- ==========================================================
+
+DELIMITER $$
+
+CREATE FUNCTION function_calculate_total_premium
+(
+    input_base_premium DECIMAL(12,2),
+    input_tax_amount DECIMAL(12,2)
+)
+
+RETURNS DECIMAL(12,2)
+
+DETERMINISTIC
+
+BEGIN
+
+    DECLARE total_amount DECIMAL(12,2);
+
+    SET total_amount =
+    input_base_premium + input_tax_amount;
+
+    RETURN total_amount;
+
+END $$
+
+DELIMITER ;
+
+
+
+
+-- ==========================================================
+-- FUNCTION 2
+-- Calculate Vehicle Age Category
+-- ==========================================================
+
+DELIMITER $$
+
+CREATE FUNCTION function_calculate_vehicle_age_category
+(
+    input_manufacture_year INT
+)
+
+RETURNS VARCHAR(50)
+
+DETERMINISTIC
+
+BEGIN
+
+    DECLARE vehicle_age INT;
+
+    SET vehicle_age =
+    YEAR(CURDATE()) - input_manufacture_year;
+
+    IF vehicle_age > 10 THEN
+
+        RETURN 'OLD VEHICLE';
+
+    ELSEIF vehicle_age BETWEEN 5 AND 10 THEN
+
+        RETURN 'MEDIUM AGE VEHICLE';
+
+    ELSE
+
+        RETURN 'NEW VEHICLE';
+
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+
+-- ==========================================================
+-- FUNCTION 3
+-- Calculate Insurance Premium Based On Rate
+-- ==========================================================
+
+DELIMITER $$
+
+CREATE FUNCTION function_calculate_premium_amount
+(
+    input_vehicle_value DECIMAL(15,2),
+    input_rate_percent DECIMAL(8,2)
+)
+
+RETURNS DECIMAL(15,2)
+
+DETERMINISTIC
+
+BEGIN
+
+    DECLARE premium_amount DECIMAL(15,2);
+
+    SET premium_amount =
+    (input_vehicle_value * input_rate_percent) / 100;
+
+    RETURN premium_amount;
+
+END $$
+
+DELIMITER ;
+
+
+-- ==========================================================
+-- FUNCTION 4
+-- Calculate Claim Remaining Amount
+-- ==========================================================
+
+DELIMITER $$
+
+CREATE FUNCTION function_calculate_remaining_claim_amount
+(
+    input_claim_amount DECIMAL(15,2),
+    input_paid_amount DECIMAL(15,2)
+)
+
+RETURNS DECIMAL(15,2)
+
+DETERMINISTIC
+
+BEGIN
+
+    DECLARE remaining_amount DECIMAL(15,2);
+
+    SET remaining_amount =
+    input_claim_amount - input_paid_amount;
+
+    IF remaining_amount < 0 THEN
+
+        SET remaining_amount = 0;
+
+    END IF;
+
+    RETURN remaining_amount;
+
+END $$
+
+DELIMITER ;
+
+-- Function Verifications 
+
+SELECT function_calculate_vehicle_age(2020) AS vehicle_age;
+
+SELECT function_calculate_tax_amount(25000) AS tax_amount;
+
+SELECT function_calculate_total_premium(25000,5000) AS total_premium;
+
+SELECT function_calculate_policy_duration('2026-01-01','2027-01-01') AS policy_duration;
+
+-- ==========================================================
+-- PROCEDURE 1
+-- Generate Insurance Quote
+-- ==========================================================
+
+DELIMITER $$
+
+CREATE PROCEDURE stored_procedure_generate_quote
+(
+    IN input_quote_id INT,
+    IN input_customer_id INT,
+    IN input_vehicle_id INT,
+    IN input_base_premium DECIMAL(12,2),
+    IN input_tax_amount DECIMAL(12,2),
+    IN input_created_by VARCHAR(50)
+)
+
+BEGIN
+
+    IF EXISTS
+    (
+        SELECT customer_id
+        FROM mi_customers
+        WHERE customer_id = input_customer_id
+    )
+
+    THEN
+
+        INSERT INTO mi_quotes
+        (
+            quote_id,
+            customer_id,
+            vehicle_id,
+            quote_date,
+            base_premium,
+            tax_amount,
+            final_premium,
+            quote_status,
+            status,
+            created_by
+        )
+
+        VALUES
+        (
+            input_quote_id,
+            input_customer_id,
+            input_vehicle_id,
+            CURDATE(),
+            input_base_premium,
+            input_tax_amount,
+            function_calculate_total_premium(
+                input_base_premium,
+                input_tax_amount
+            ),
+            'CREATED',
+            'ACTIVE',
+            input_created_by
+        );
+
+    ELSE
+
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT =
+        'Customer does not exist';
+
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+
+
+-- ==========================================================
+-- PROCEDURE 2
+-- Process Customer Payment
+-- ==========================================================
+
+DELIMITER $$
+
+CREATE PROCEDURE stored_procedure_process_payment
+(
+    IN input_payment_id INT,
+    IN input_quote_id INT,
+    IN input_amount DECIMAL(15,2),
+    IN input_payment_mode VARCHAR(50),
+    IN input_transaction_no VARCHAR(100),
+    IN input_created_by VARCHAR(50)
+)
+
+BEGIN
+
+    IF EXISTS
+    (
+        SELECT quote_id
+        FROM mi_quotes
+        WHERE quote_id = input_quote_id
+    )
+
+    THEN
+
+        INSERT INTO mi_payments
+        (
+            payment_id,
+            quote_id,
+            payment_date,
+            amount,
+            currency,
+            payment_mode,
+            transaction_no,
+            payment_status,
+            status,
+            created_by
+        )
+
+        VALUES
+        (
+            input_payment_id,
+            input_quote_id,
+            CURDATE(),
+            input_amount,
+            'INR',
+            input_payment_mode,
+            input_transaction_no,
+            'SUCCESS',
+            'ACTIVE',
+            input_created_by
+        );
+
+
+        UPDATE mi_quotes
+
+        SET quote_status = 'PAID'
+
+        WHERE quote_id = input_quote_id;
+
+
+    ELSE
+
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT =
+        'Quote does not exist';
+
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+
+-- ==========================================================
+-- PROCEDURE 3
+-- Generate Insurance Policy
+-- ==========================================================
+
+DELIMITER $$
+
+CREATE PROCEDURE stored_procedure_generate_policy
+(
+    IN input_policy_id INT,
+    IN input_quote_id INT,
+    IN input_policy_number VARCHAR(100),
+    IN input_premium_amount DECIMAL(15,2),
+    IN input_created_by VARCHAR(50)
+)
+
+BEGIN
+
+    IF EXISTS
+    (
+        SELECT quote_id
+        FROM mi_quotes
+        WHERE quote_id = input_quote_id
+    )
+
+    THEN
+
+        INSERT INTO mi_policies
+        (
+            policy_id,
+            quote_id,
+            policy_number,
+            policy_start_date,
+            policy_end_date,
+            premium_amount,
+            policy_status,
+            status,
+            created_by
+        )
+
+        VALUES
+        (
+            input_policy_id,
+            input_quote_id,
+            input_policy_number,
+            CURDATE(),
+            DATE_ADD(CURDATE(), INTERVAL 1 YEAR),
+            input_premium_amount,
+            'ACTIVE',
+            'ACTIVE',
+            input_created_by
+        );
+
+    ELSE
+
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT =
+        'Quote does not exist';
+
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+
+-- ==========================================================
+-- PROCEDURE 4
+-- Register Customer Claim
+-- ==========================================================
+
+DELIMITER $$
+
+CREATE PROCEDURE stored_procedure_register_claim
+(
+    IN input_claim_id INT,
+    IN input_policy_id INT,
+    IN input_claim_amount DECIMAL(15,2),
+    IN input_remarks VARCHAR(255),
+    IN input_created_by VARCHAR(50)
+)
+
+BEGIN
+
+    IF EXISTS
+    (
+        SELECT policy_id
+        FROM mi_policies
+        WHERE policy_id = input_policy_id
+    )
+
+    THEN
+
+        INSERT INTO mi_claims
+        (
+            claim_id,
+            policy_id,
+            claim_date,
+            claim_amount,
+            claim_status,
+            remarks,
+            status,
+            created_by
+        )
+
+        VALUES
+        (
+            input_claim_id,
+            input_policy_id,
+            CURDATE(),
+            input_claim_amount,
+            'PENDING',
+            input_remarks,
+            'ACTIVE',
+            input_created_by
+        );
+
+    ELSE
+
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT =
+        'Policy does not exist';
+
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+-- Procedure Verification codes
+
+CALL stored_procedure_generate_quote();
+
+CALL stored_procedure_process_payment();
+
+CALL stored_procedure_generate_policy();
+
+CALL stored_procedure_register_claim();
+
+
+-- ==========================================================
+-- TRIGGER 1
+-- Audit Payment Insert
+-- ==========================================================
+
+DELIMITER $$
+
+CREATE TRIGGER trigger_insert_audit_log_after_payment
+
+AFTER INSERT ON mi_payments
+
+FOR EACH ROW
+
+BEGIN
+
+INSERT INTO mi_audit_log
+(
+table_name,
+record_id,
+action_type,
+new_value,
+action_by
+)
+
+VALUES
+(
+'mi_payments',
+NEW.payment_id,
+'INSERT',
+NEW.payment_status,
+NEW.created_by
+);
+
+END $$
+
+DELIMITER ;
+
+
+-- ==========================================================
+-- TRIGGER 2
+-- Audit Policy Insert
+-- ==========================================================
+
+DELIMITER $$
+
+CREATE TRIGGER trigger_insert_audit_log_after_policy
+
+AFTER INSERT ON mi_policies
+
+FOR EACH ROW
+
+BEGIN
+
+INSERT INTO mi_audit_log
+(
+table_name,
+record_id,
+action_type,
+new_value,
+action_by
+)
+
+VALUES
+(
+'mi_policies',
+NEW.policy_id,
+'INSERT',
+NEW.policy_status,
+NEW.created_by
+);
+
+END $$
+
+DELIMITER ;
+
+
+-- ==========================================================
+-- TRIGGER 3
+-- Update Quote After Payment
+-- ==========================================================
+
+DELIMITER $$
+
+CREATE TRIGGER trigger_update_quote_status_after_payment
+
+AFTER INSERT ON mi_payments
+
+FOR EACH ROW
+
+BEGIN
+
+UPDATE mi_quotes
+
+SET quote_status = 'PAID'
+
+WHERE quote_id = NEW.quote_id;
+
+END $$
+
+DELIMITER ;
+
+
+-- ==========================================================
+-- TRIGGER 4
+-- Audit Claim Insert
+-- ==========================================================
+
+DELIMITER $$
+
+CREATE TRIGGER trigger_insert_audit_log_after_claim
+
+AFTER INSERT ON mi_claims
+
+FOR EACH ROW
+
+BEGIN
+
+INSERT INTO mi_audit_log
+(
+table_name,
+record_id,
+action_type,
+new_value,
+action_by
+)
+
+VALUES
+(
+'mi_claims',
+NEW.claim_id,
+'INSERT',
+NEW.claim_status,
+NEW.created_by
+);
+
+END $$
+
+DELIMITER ;
+
+
+ALTER TABLE mi_audit_log
+MODIFY audit_id INT AUTO_INCREMENT;
+
+
+
+-- Trigger Varification Code
+
+INSERT INTO mi_payments
+(
+payment_id,
+quote_id,
+payment_date,
+amount,
+currency,
+payment_mode,
+transaction_no,
+payment_status,
+status,
+created_by
+)
+VALUES
+(
+6001,
+1,
+CURDATE(),
+30000,
+'INR',
+'ONLINE',
+'TEST6001',
+'SUCCESS',
+'ACTIVE',
+'ADMIN'
+);
+
+SELECT * FROM mi_audit_log;
+
+
+-- ==========================================================
+-- TRANSACTION 1
+-- Process Payment Transaction
+-- ==========================================================
+
+START TRANSACTION;
+
+INSERT INTO mi_payments
+(
+payment_id,
+quote_id,
+payment_date,
+amount,
+currency,
+payment_mode,
+transaction_no,
+payment_status,
+status,
+created_by
+)
+
+VALUES
+(
+5001,
+1,
+CURDATE(),
+25000,
+'INR',
+'ONLINE',
+'TXN10001',
+'SUCCESS',
+'ACTIVE',
+'ADMIN'
+);
+
+
+UPDATE mi_quotes
+
+SET quote_status = 'PAID'
+
+WHERE quote_id = 1;
+
+
+COMMIT;
+
+
+
+-- ==========================================================
+-- TRANSACTION 2
+-- Generate Policy Transaction
+-- ==========================================================
+
+START TRANSACTION;
+
+
+INSERT INTO mi_policies
+(
+policy_id,
+quote_id,
+policy_number,
+policy_start_date,
+policy_end_date,
+premium_amount,
+policy_status,
+status,
+created_by
+)
+
+VALUES
+(
+7001,
+1,
+'POL10001',
+CURDATE(),
+DATE_ADD(CURDATE(), INTERVAL 1 YEAR),
+25000,
+'ACTIVE',
+'ACTIVE',
+'ADMIN'
+);
+
+
+UPDATE mi_quotes
+
+SET quote_status = 'POLICY GENERATED'
+
+WHERE quote_id = 1;
+
+
+COMMIT;
+
+/*=====================================================================
+SCENARIO 1
+TOP PREMIUM PAYING CUSTOMER
+
+Business Requirement:
+Display the customer who purchased the highest premium policy.
+
+Concepts Used:
+SELECT, INNER JOIN, ORDER BY, LIMIT
+=====================================================================*/
+
+SELECT
+    c.customer_id,
+    CONCAT(c.first_name,' ',c.last_name) AS customer_name,
+    q.quote_id,
+    p.policy_number,
+    q.final_premium
+FROM mi_customers c
+INNER JOIN mi_quotes q
+    ON c.customer_id = q.customer_id
+INNER JOIN mi_policies p
+    ON q.quote_id = p.quote_id
+ORDER BY q.final_premium DESC
+LIMIT 1;
+
+
+/*=====================================================================
+SCENARIO 2
+CUSTOMER OWNING MAXIMUM VEHICLES
+
+Business Requirement:
+Display the customer who owns the highest number of vehicles.
+
+Concepts Used:
+SELECT, INNER JOIN, COUNT(), GROUP BY, ORDER BY, LIMIT
+=====================================================================*/
+
+SELECT
+    c.customer_id,
+    CONCAT(c.first_name,' ',c.last_name) AS customer_name,
+    COUNT(v.vehicle_id) AS total_vehicles
+FROM mi_customers c
+INNER JOIN mi_vehicles v
+    ON c.customer_id = v.customer_id
+GROUP BY
+    c.customer_id,
+    c.first_name,
+    c.last_name
+ORDER BY total_vehicles DESC
+LIMIT 1;
+
+/*=====================================================================
+SCENARIO 3
+CUSTOMER VEHICLE PORTFOLIO REPORT
+
+Business Requirement:
+Display customers with their registered vehicle details.
+
+Concepts Used:
+INNER JOIN, CONCAT
+=====================================================================*/
+
+SELECT
+    c.customer_id,
+    CONCAT(c.first_name,' ',c.last_name) AS customer_name,
+    v.vehicle_id,
+    v.registration_no,
+    v.manufacture_year
+FROM mi_customers c
+INNER JOIN mi_vehicles v
+ON c.customer_id = v.customer_id;
+
+
+/*=====================================================================
+SCENARIO 4
+CUSTOMER SUCCESSFUL PAYMENT HISTORY
+
+Business Requirement:
+Display customers who completed successful payments.
+
+Concepts Used:
+INNER JOIN, WHERE
+=====================================================================*/
+
+SELECT
+    c.customer_id,
+    CONCAT(c.first_name,' ',c.last_name) AS customer_name,
+    p.payment_id,
+    p.amount,
+    p.currency,
+    p.payment_mode
+FROM mi_customers c
+INNER JOIN mi_quotes q
+ON c.customer_id = q.customer_id
+INNER JOIN mi_payments p
+ON q.quote_id = p.quote_id
+WHERE p.payment_status = 'SUCCESS'
+limit 10;
+
+
+
+/*=====================================================================
+SCENARIO 5
+CUSTOMER POLICY HISTORY
+
+Business Requirement:
+Display complete policy history of all customers.
+
+Concepts Used:
+SELECT, INNER JOIN, ORDER BY
+=====================================================================*/
+
+SELECT
+    c.customer_id,
+    CONCAT(c.first_name,' ',c.last_name) AS customer_name,
+    p.policy_number,
+    p.policy_start_date,
+    p.policy_end_date,
+    p.policy_status,
+    q.final_premium
+FROM mi_customers c
+INNER JOIN mi_quotes q
+    ON c.customer_id = q.customer_id
+INNER JOIN mi_policies p
+    ON q.quote_id = p.quote_id
+ORDER BY
+    c.customer_id,
+    p.policy_start_date DESC
+    limit 10;
+
+/*=====================================================================
+SCENARIO 6
+BROKER GENERATING HIGHEST PREMIUM
+
+Business Requirement:
+Display the broker who generated the highest premium.
+
+Concepts Used:
+INNER JOIN, SUM(), GROUP BY, ORDER BY, LIMIT
+=====================================================================*/
+
+SELECT
+    b.broker_id,
+    b.organization_name,
+    SUM(q.final_premium) AS total_premium
+FROM mi_brokers b
+INNER JOIN mi_quotes q
+ON b.broker_id=q.broker_id
+GROUP BY
+    b.broker_id,
+    b.organization_name
+ORDER BY total_premium DESC
+LIMIT 1;
+
+
+/*=====================================================================
+SCENARIO 7
+SALES AGENT GENERATING HIGHEST BUSINESS
+
+Business Requirement:
+Display the sales agent who generated the highest premium business.
+
+Concepts Used:
+INNER JOIN, SUM(), GROUP BY, ORDER BY, LIMIT
+=====================================================================*/
+
+SELECT
+    sa.agent_id,
+    CONCAT(u.first_name,' ',u.last_name) AS agent_name,
+    SUM(q.final_premium) AS total_business
+FROM mi_sales_agents sa
+INNER JOIN mi_users u
+ON sa.user_id=u.user_id
+INNER JOIN mi_quotes q
+ON sa.agent_id=q.agent_id
+GROUP BY
+    sa.agent_id,
+    u.first_name,
+    u.last_name
+ORDER BY total_business DESC
+LIMIT 1;
+
+
+/*=====================================================================
+SCENARIO 8
+BROKER-WISE BUSINESS REPORT
+
+Business Requirement:
+Display broker-wise total quotes and premium.
+
+Concepts Used:
+INNER JOIN, COUNT(), SUM(), AVG(), GROUP BY
+=====================================================================*/
+
+SELECT
+    b.broker_id,
+    b.organization_name,
+    COUNT(q.quote_id) AS total_quotes,
+    SUM(q.final_premium) AS total_premium,
+    AVG(q.final_premium) AS average_premium
+FROM mi_brokers b
+INNER JOIN mi_quotes q
+ON b.broker_id=q.broker_id
+GROUP BY
+    b.broker_id,
+    b.organization_name
+ORDER BY total_premium DESC;
+
+
+/*=====================================================================
+SCENARIO 9
+AGENT-WISE BUSINESS REPORT
+
+Business Requirement:
+Display sales agent wise business report.
+
+Concepts Used:
+INNER JOIN, COUNT(), SUM(), AVG(), GROUP BY
+=====================================================================*/
+
+SELECT
+    sa.agent_id,
+    CONCAT(u.first_name,' ',u.last_name) AS agent_name,
+    COUNT(q.quote_id) AS total_quotes,
+    SUM(q.final_premium) AS total_premium,
+    AVG(q.final_premium) AS average_premium
+FROM mi_sales_agents sa
+INNER JOIN mi_users u
+ON sa.user_id=u.user_id
+INNER JOIN mi_quotes q
+ON sa.agent_id=q.agent_id
+GROUP BY
+    sa.agent_id,
+    u.first_name,
+    u.last_name
+ORDER BY total_premium DESC;
+
+
+/*=====================================================================
+SCENARIO 10
+BROKER RANKING BY BUSINESS
+
+Business Requirement:
+Rank brokers based on total premium generated.
+
+Concepts Used:
+WINDOW FUNCTION, RANK(), SUM(), GROUP BY
+=====================================================================*/
+
+SELECT
+    b.broker_id,
+    b.organization_name,
+    SUM(q.final_premium) AS total_premium,
+    RANK() OVER
+    (
+        ORDER BY SUM(q.final_premium) DESC
+    ) AS broker_rank
+FROM mi_brokers b
+INNER JOIN mi_quotes q
+ON b.broker_id=q.broker_id
+GROUP BY
+    b.broker_id,
+    b.organization_name;
+    
+    /*=====================================================================
+SCENARIO 11
+VEHICLE CATEGORY WITH HIGHEST POLICIES
+
+Business Requirement:
+Display the vehicle category having the highest number of policies.
+
+Concepts Used:
+INNER JOIN, GROUP BY, COUNT(), ORDER BY, LIMIT
+=====================================================================*/
+
+SELECT
+    vc.category_id,
+    vc.category_name,
+    COUNT(p.policy_id) AS total_policies
+FROM mi_vehicle_category vc
+INNER JOIN mi_vehicles v
+ON vc.category_id=v.category_id
+INNER JOIN mi_quotes q
+ON v.vehicle_id=q.vehicle_id
+INNER JOIN mi_policies p
+ON q.quote_id=p.quote_id
+GROUP BY
+    vc.category_id,
+    vc.category_name
+ORDER BY total_policies DESC
+LIMIT 1;
+
+
+/*=====================================================================
+SCENARIO 12
+MOST SELECTED COVERAGE
+
+Business Requirement:
+Display the most selected insurance coverage.
+
+Concepts Used:
+INNER JOIN, GROUP BY, COUNT(), ORDER BY, LIMIT
+=====================================================================*/
+
+SELECT
+    c.coverage_id,
+    c.coverage_name,
+    COUNT(qc.coverage_id) AS total_selected
+FROM mi_coverages c
+INNER JOIN mi_quote_coverages qc
+ON c.coverage_id=qc.coverage_id
+GROUP BY
+    c.coverage_id,
+    c.coverage_name
+ORDER BY total_selected DESC
+LIMIT 1;
+
+
+/*=====================================================================
+SCENARIO 13
+COVERAGE GENERATING HIGHEST PREMIUM
+
+Business Requirement:
+Display the coverage generating the highest premium amount.
+
+Concepts Used:
+INNER JOIN, GROUP BY, SUM(), ORDER BY, LIMIT
+=====================================================================*/
+
+SELECT
+    c.coverage_id,
+    c.coverage_name,
+    SUM(qc.premium_amount) AS total_premium
+FROM mi_coverages c
+INNER JOIN mi_quote_coverages qc
+ON c.coverage_id=qc.coverage_id
+GROUP BY
+    c.coverage_id,
+    c.coverage_name
+ORDER BY total_premium DESC
+LIMIT 1;
+
+
+/*=====================================================================
+SCENARIO 14
+AVERAGE PREMIUM BY VEHICLE CATEGORY
+
+Business Requirement:
+Display average premium for every vehicle category.
+
+Concepts Used:
+INNER JOIN, AVG(), GROUP BY
+=====================================================================*/
+
+SELECT
+    vc.category_name,
+    AVG(q.final_premium) AS average_premium
+FROM mi_vehicle_category vc
+INNER JOIN mi_vehicles v
+ON vc.category_id=v.category_id
+INNER JOIN mi_quotes q
+ON v.vehicle_id=q.vehicle_id
+GROUP BY
+    vc.category_name
+ORDER BY average_premium DESC;
+
+
+/*=====================================================================
+SCENARIO 15
+VEHICLE CUSTOMER INFORMATION REPORT
+
+Business Requirement:
+Display all vehicles with customer information.
+
+Concepts Used:
+LEFT JOIN
+=====================================================================*/
+
+SELECT
+    v.vehicle_id,
+    v.registration_no,
+    v.manufacture_year,
+    CONCAT(c.first_name,' ',c.last_name) AS customer_name
+FROM mi_vehicles v
+LEFT JOIN mi_customers c
+ON v.customer_id = c.customer_id
+limit 10;
+
+
+/*=====================================================================
+SCENARIO 16
+QUOTE PAYMENT STATUS REPORT
+
+Business Requirement:
+Display quote details with payment completion status.
+
+Concepts Used:
+LEFT JOIN, CASE
+=====================================================================*/
+
+SELECT
+    q.quote_id,
+    q.final_premium,
+    p.payment_id,
+    CASE
+        WHEN p.payment_id IS NULL THEN 'PAYMENT NOT FOUND'
+        ELSE 'PAYMENT COMPLETED'
+    END AS payment_status
+FROM mi_quotes q
+LEFT JOIN mi_payments p
+ON q.quote_id = p.quote_id;
+
+
+
+/*=====================================================================
+SCENARIO 17
+PAYMENT POLICY STATUS REPORT
+
+Business Requirement:
+Display payments and their policy generation status.
+
+Concepts Used:
+LEFT JOIN, CASE
+=====================================================================*/
+
+SELECT
+    p.payment_id,
+    p.amount,
+    p.payment_status,
+    pol.policy_number,
+    CASE
+        WHEN pol.policy_id IS NULL THEN 'POLICY NOT GENERATED'
+        ELSE 'POLICY GENERATED'
+    END AS policy_status
+FROM mi_payments p
+LEFT JOIN mi_quotes q
+ON p.quote_id = q.quote_id
+LEFT JOIN mi_policies pol
+ON q.quote_id = pol.quote_id;
+
+
+
+/*=====================================================================
+SCENARIO 18
+LOWEST PREMIUM POLICY
+
+Business Requirement:
+Display the policy having the lowest premium.
+
+Concepts Used:
+INNER JOIN, ORDER BY, LIMIT
+=====================================================================*/
+
+SELECT
+    po.policy_number,
+    c.first_name,
+    c.last_name,
+    q.final_premium
+FROM mi_policies po
+INNER JOIN mi_quotes q
+ON po.quote_id = q.quote_id
+INNER JOIN mi_customers c
+ON q.customer_id = c.customer_id
+ORDER BY q.final_premium ASC
+LIMIT 1;
+
+
+/*=====================================================================
+SCENARIO 19
+TOP 10 PREMIUM POLICIES
+
+Business Requirement:
+Display the top 10 highest premium policies.
+
+Concepts Used:
+INNER JOIN, ORDER BY, LIMIT
+=====================================================================*/
+
+SELECT
+    po.policy_number,
+    c.first_name,
+    c.last_name,
+    q.final_premium
+FROM mi_policies po
+INNER JOIN mi_quotes q
+ON po.quote_id = q.quote_id
+INNER JOIN mi_customers c
+ON q.customer_id = c.customer_id
+ORDER BY q.final_premium DESC
+LIMIT 10;
+
+
+
+/*=====================================================================
+SCENARIO 20
+POLICY DURATION REPORT
+
+Business Requirement:
+Display policy duration period.
+
+Concepts Used:
+DATEDIFF, ORDER BY
+=====================================================================*/
+
+SELECT
+    policy_id,
+    policy_number,
+    policy_start_date,
+    policy_end_date,
+    DATEDIFF(policy_end_date,policy_start_date) AS policy_duration_days
+FROM mi_policies
+ORDER BY policy_duration_days DESC;
+
+
+
+/*=====================================================================
+SCENARIO 21
+POLICY CLAIM SUMMARY REPORT
+
+Business Requirement:
+Display total claims registered for each policy.
+
+Concepts Used:
+LEFT JOIN, COUNT, GROUP BY
+=====================================================================*/
+
+SELECT
+    p.policy_id,
+    p.policy_number,
+    COUNT(c.claim_id) AS total_claims
+FROM mi_policies p
+LEFT JOIN mi_claims c
+ON p.policy_id = c.policy_id
+GROUP BY
+    p.policy_id,
+    p.policy_number;
+
+
+
+/*=====================================================================
+SCENARIO 22
+CLAIM AMOUNT ANALYSIS REPORT
+
+Business Requirement:
+Display claim amount analysis based on claim status.
+
+Concepts Used:
+SUM, AVG, GROUP BY
+=====================================================================*/
+
+SELECT
+    claim_status,
+    COUNT(claim_id) AS total_claims,
+    SUM(claim_amount) AS total_claim_amount,
+    AVG(claim_amount) AS average_claim_amount
+FROM mi_claims
+GROUP BY claim_status;
+
+/*=====================================================================
+SCENARIO 23
+CLAIM SUMMARY REPORT
+
+Business Requirement:
+Display claim summary based on claim status.
+
+Concepts Used:
+GROUP BY, COUNT(), SUM(), AVG()
+=====================================================================*/
+
+SELECT
+    claim_status,
+    COUNT(*) AS total_claims,
+    SUM(claim_amount) AS total_claim_amount,
+    AVG(claim_amount) AS average_claim_amount
+FROM mi_claims
+GROUP BY claim_status
+ORDER BY total_claim_amount DESC;
+
+
+/*=====================================================================
+SCENARIO 24
+CITY WITH HIGHEST CUSTOMERS
+
+Business Requirement:
+Display the city having the maximum number of customers.
+
+Concepts Used:
+INNER JOIN, GROUP BY, COUNT(), ORDER BY, LIMIT
+=====================================================================*/
+
+SELECT
+    ct.city_name,
+    COUNT(c.customer_id) AS total_customers
+FROM mi_cities ct
+INNER JOIN mi_customers c
+ON ct.city_id = c.city_id
+GROUP BY
+    ct.city_id,
+    ct.city_name
+ORDER BY total_customers DESC
+LIMIT 1;
+
+
+/*=====================================================================
+SCENARIO 25
+STATE WITH HIGHEST POLICIES
+
+Business Requirement:
+Display the state having the highest number of policies issued.
+
+Concepts Used:
+INNER JOIN, GROUP BY, COUNT(), ORDER BY, LIMIT
+=====================================================================*/
+
+SELECT
+    s.state_name,
+    COUNT(p.policy_id) AS total_policies
+FROM mi_states s
+INNER JOIN mi_cities ct
+ON s.state_id = ct.state_id
+INNER JOIN mi_customers cu
+ON ct.city_id = cu.city_id
+INNER JOIN mi_quotes q
+ON cu.customer_id = q.customer_id
+INNER JOIN mi_policies p
+ON q.quote_id = p.quote_id
+GROUP BY
+    s.state_id,
+    s.state_name
+ORDER BY total_policies DESC
+LIMIT 1;
+
+
+/*=====================================================================
+SCENARIO 26
+REGION WITH HIGHEST BUSINESS
+
+Business Requirement:
+Display the region generating the highest premium business.
+
+Concepts Used:
+INNER JOIN, GROUP BY, SUM(), ORDER BY, LIMIT
+=====================================================================*/
+
+SELECT
+    r.region_name,
+    SUM(q.final_premium) AS total_business
+FROM mi_regions r
+INNER JOIN mi_states s
+ON r.region_id = s.region_id
+INNER JOIN mi_cities c
+ON s.state_id = c.state_id
+INNER JOIN mi_customers cu
+ON c.city_id = cu.city_id
+INNER JOIN mi_quotes q
+ON cu.customer_id = q.customer_id
+GROUP BY
+    r.region_id,
+    r.region_name
+ORDER BY total_business DESC
+LIMIT 1;
+
+
+/*=====================================================================
+SCENARIO 27
+MONTHLY PREMIUM COLLECTION REPORT
+
+Business Requirement:
+Display month-wise premium collection.
+
+Concepts Used:
+GROUP BY, SUM(), MONTH(), YEAR()
+=====================================================================*/
+
+SELECT
+    YEAR(payment_date) AS payment_year,
+    MONTH(payment_date) AS payment_month,
+    SUM(amount) AS total_collection
+FROM mi_payments
+GROUP BY
+    YEAR(payment_date),
+    MONTH(payment_date)
+ORDER BY
+    payment_year,
+    payment_month;
+
+
+/*=====================================================================
+SCENARIO 28
+ACTIVE VS INACTIVE CUSTOMERS
+
+Business Requirement:
+Display the number of Active and Inactive customers.
+
+Concepts Used:
+GROUP BY, COUNT()
+=====================================================================*/
+
+SELECT
+    status,
+    COUNT(*) AS total_customers
+FROM mi_customers
+GROUP BY status;
+
+
+/*=====================================================================
+SCENARIO 29
+CUSTOMER RANKING BY PREMIUM
+
+Business Requirement:
+Rank customers based on total premium paid.
+
+Concepts Used:
+WINDOW FUNCTION, RANK(), GROUP BY, SUM()
+=====================================================================*/
+
+SELECT
+    c.customer_id,
+    CONCAT(c.first_name,' ',c.last_name) AS customer_name,
+    SUM(q.final_premium) AS total_premium,
+    RANK() OVER
+    (
+        ORDER BY SUM(q.final_premium) DESC
+    ) AS customer_rank
+FROM mi_customers c
+INNER JOIN mi_quotes q
+ON c.customer_id=q.customer_id
+GROUP BY
+    c.customer_id,
+    c.first_name,
+    c.last_name;
+
+
+/*=====================================================================
+SCENARIO 30
+COMPLETE INSURANCE DASHBOARD REPORT
+
+Business Requirement:
+Display complete business summary of the Motor Insurance System.
+
+Concepts Used:
+Sub Queries, Aggregate Functions
+=====================================================================*/
+
+SELECT
+    (SELECT COUNT(*) FROM mi_customers) AS total_customers,
+    (SELECT COUNT(*) FROM mi_vehicles) AS total_vehicles,
+    (SELECT COUNT(*) FROM mi_quotes) AS total_quotes,
+    (SELECT COUNT(*) FROM mi_policies) AS total_policies,
+    (SELECT COUNT(*) FROM mi_claims) AS total_claims,
+    (SELECT SUM(final_premium) FROM mi_quotes) AS total_premium,
+    (SELECT SUM(amount) FROM mi_payments) AS total_payment_received,
+    (SELECT SUM(claim_amount) FROM mi_claims) AS total_claim_amount;
+ 
+ 
+ -- End of Excecution
